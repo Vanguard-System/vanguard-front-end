@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react'
 import logo from "./../../assets/logo.png"
+import { Link } from "react-router-dom"
 
 interface LoginFormData {
   email: string
@@ -161,6 +162,7 @@ export default function Login() {
           </CardContent>
 
           <CardFooter className="flex flex-col space-y-4">
+          <Link to='/Home'>  
             <Button
               type="submit"
               className="w-full"
@@ -168,6 +170,7 @@ export default function Login() {
             >
               {isLoading ? "Entrando..." : "Entrar"}
             </Button>
+          </Link>
 
             <div className="text-center text-sm text-muted-foreground">
               Não tem uma conta?{" "}
