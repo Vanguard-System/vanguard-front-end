@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import BasePage from "@/pages/BasePage";
 import Login from "@/components/login";
 import Home from "@/pages/HomePage";
+// import BudgetPage from "@/pages/BudgetPage";
 
 
 export default function AppRoutes() {
@@ -12,7 +13,7 @@ export default function AppRoutes() {
 
         <Route path="/" element={<BasePage />}>
         <Route path="/Home" element={<Home />}/>
-
+        {/* <Route path="/Orcamentos" element={<BudgetPage/>} /> */}
           
           {/* outras rotas aninhadas aqui */}
         </Route>

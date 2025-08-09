@@ -1,6 +1,6 @@
 "use client"
 
-import { Home, FileText, User, Car } from 'lucide-react'
+import { Home, FileText, User, Car, Users } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -26,38 +26,43 @@ const menuItems = [
   {
     title: "Motorista",
     icon: User,
-    url: "/Motorista",
+    url: "#",
   },
   {
     title: "Carro",
     icon: Car,
-    url: "/Carro",
+    url: "#",
+  },
+  {
+    title: "Clientes",
+    icon: Users,
+    url: "#",
   },
 ]
 
 export default function SidebarApp() {
   return (
-    <SidebarProvider>
-      <Sidebar className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 border-r border-gray-200">
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {menuItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <a href={item.url}>
-                        <item.icon className="w-4 h-4" />
-                        <span>{item.title}</span>
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
-      </Sidebar>
-    </SidebarProvider>
+  <SidebarProvider>
+    <Sidebar className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 border-r border-gray-200">
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {menuItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <a href={item.url}>
+                      <item.icon className="w-4 h-4" />
+                      <span>{item.title}</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+    </Sidebar>
+  </SidebarProvider>
   )
 }
