@@ -1,6 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import BasePage from "@/pages/BasePage";
-import Login from "@/components/login";
+import Login from "@/pages/LoginPage";
 import Home from "@/pages/HomePage";
 // import BudgetPage from "@/pages/BudgetPage";
 
@@ -12,9 +12,8 @@ export default function AppRoutes() {
         <Route path="/login" element={<Login />} /> {/* <- rota direta */}
 
         <Route path="/" element={<BasePage />}>
-        <Route path="/Home" element={<Home />}/>
-        {/* <Route path="/Orcamentos" element={<BudgetPage/>} /> */}
-          
+        <Route path="/Home" element={<Home />} />
+
           {/* outras rotas aninhadas aqui */}
         </Route>
       </Routes>

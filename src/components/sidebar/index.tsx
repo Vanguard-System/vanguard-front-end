@@ -19,11 +19,6 @@ const menuItems = [
     url: "/Home",
   },
   {
-    title: "Orçamentos",
-    icon: FileText,
-    url: "/Orcamentos",
-  },
-  {
     title: "Motorista",
     icon: User,
     url: "#",

@@ -1,6 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import CardComponent from "@/components/card"
+import { useState } from "react"
+import BudgetModal from "@/components/modal"
 
 // Dados de exemplo
 const viagens = [
@@ -66,14 +68,26 @@ const viagens = [
   },
 ]
 
+
 export default function Page() {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  
   return (
     <>
     
       <div className="ml-64 p-6">
+        <div>
         <div className="flex justify-between items-center mt-10 mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Lista de Viagens</h1>
-          <Button className="bg-blue-600 hover:bg-blue-700">Nova Viagem</Button>
+          <Button
+            className="bg-blue-600 hover:bg-blue-700"
+            onClick={() => setIsModalOpen(true)}
+          >
+            Nova Viagem
+          </Button>
+        </div>
+
+        <BudgetModal open={isModalOpen} onOpenChange={setIsModalOpen} />
         </div>
 
         <div className="grid gap-6">
