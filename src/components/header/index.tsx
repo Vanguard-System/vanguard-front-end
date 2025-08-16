@@ -1,12 +1,17 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Settings, User, LogOut } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Settings, User, LogOut, Search } from "lucide-react"
+import { Link } from "react-router-dom"
 
 export default function Header() {
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [notifications] = useState(3) // Simulando notificações
+  const [searchQuery, setSearchQuery] = useState("")
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode)
@@ -15,6 +20,20 @@ export default function Header() {
   const handleLogout = () => {
     // Lógica de logout aqui
     console.log("Saindo do sistema...")
+  }
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      console.log("Pesquisando por:", searchQuery)
+      // Aqui você pode implementar a lógica de pesquisa
+      // Por exemplo: redirecionar para uma página de resultados
+      // router.push(`/search?q=${encodeURIComponent(searchQuery)}`)
+    }
+  }
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value)
   }
 
   return (
@@ -29,7 +48,22 @@ export default function Header() {
             <span className="ml-3 text-xl font-bold text-gray-900">Vanguard</span>
           </div>
 
-          {/* Centro - Informações do usuário e controles */}
+          <div className="flex-1 max-w-md mx-8">
+            <form onSubmit={handleSearch} className="relative">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  type="text"
+                  placeholder="Pesquisar..."
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  className="pl-10 pr-4 py-2 w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </form>
+          </div>
+
+          {/* Direita - Informações do usuário e controles */}
           <div className="flex items-center space-x-6">
             {/* Informações do usuário */}
             <div className="hidden md:flex items-center space-x-3">
@@ -48,13 +82,16 @@ export default function Header() {
             {/* Controles */}
             <div className="flex items-center space-x-2">
               {/* Configurações */}
+             <Link to="/Settings">
               <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900">
                 <Settings className="w-4 h-4" />
               </Button>
+             </Link>
             </div>
           </div>
 
           {/* Botão de Logout */}
+         <Link to='/Login'>
           <Button
             onClick={handleLogout}
             variant="outline"
@@ -64,6 +101,7 @@ export default function Header() {
             <LogOut className="w-4 h-4 mr-2" />
             Sair
           </Button>
+         </Link>
         </div>
       </div>
     </header>

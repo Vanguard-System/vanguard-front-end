@@ -1,9 +1,12 @@
 "use client"
 
+import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { User, Mail, CreditCard, Edit, Trash2, FileText } from "lucide-react"
+import { User, Mail, CreditCard, Edit, Trash2, FileText, Check, X } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface Driver {
   id: string
@@ -14,20 +17,8 @@ interface Driver {
 }
 
 const mockDrivers: Driver[] = [
-  {
-    id: "1",
-    name: "João Silva Santos",
-    cpf: "123.456.789-01",
-    email: "joao.silva@email.com",
-    paymentType: "pagamento-fixo",
-  },
-  {
-    id: "2",
-    name: "Peter Parker",
-    cpf: "987.654.321-09",
-    email: "peterparker@email.com",
-    paymentType: "pagamento-por-viagem",
-  },
+  { id: "1", name: "João Silva Santos", cpf: "123.456.789-01", email: "joao.silva@email.com", paymentType: "pagamento-fixo" },
+  { id: "2", name: "Peter Parker", cpf: "987.654.321-09", email: "peterparker@email.com", paymentType: "pagamento-por-viagem" },
 ]
 
 const getPaymentTypeLabel = (type: string) => {
@@ -57,19 +48,38 @@ const getPaymentTypeBadgeVariant = (type: string) => {
 }
 
 export function DriverCards() {
-  const handleEdit = (driverId: string) => {
-    console.log("Editar motorista:", driverId)
-    // Implementar lógica de edição aqui
+  const [drivers, setDrivers] = useState<Driver[]>(mockDrivers)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [formData, setFormData] = useState<Driver | null>(null)
+
+  const startEdit = (driver: Driver) => {
+    setEditingId(driver.id)
+    setFormData({ ...driver })
   }
 
-  const handleDelete = (driverId: string) => {
-    console.log("Excluir motorista:", driverId)
-    // Implementar lógica de exclusão aqui
+  const cancelEdit = () => {
+    setEditingId(null)
+    setFormData(null)
   }
 
-  const handleGeneratePayroll = (driverId: string) => {
-    console.log("Gerar holerite para motorista:", driverId)
-    // Implementar lógica de geração de holerite aqui
+  const saveEdit = () => {
+    if (formData) {
+      setDrivers(prev => prev.map(d => (d.id === formData.id ? formData : d)))
+    }
+    cancelEdit()
+  }
+
+  const handleChange = (field: keyof Driver, value: string) => {
+    if (!formData) return
+    setFormData(prev => (prev ? { ...prev, [field]: value } : null))
+  }
+
+  const handleDelete = (id: string) => {
+    setDrivers(prev => prev.filter(d => d.id !== id))
+  }
+
+  const handleGeneratePayroll = (id: string) => {
+    console.log("Gerar holerite para motorista:", id)
   }
 
   return (
@@ -77,67 +87,129 @@ export function DriverCards() {
       <h2 className="text-2xl font-semibold">Motoristas Cadastrados</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-        {mockDrivers.map((driver) => (
-          <Card key={driver.id} className="hover:shadow-md transition-shadow w-full">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <User className="h-5 w-5 shrink-0" />
-                <span>{driver.name}</span>
-              </CardTitle>
-            </CardHeader>
+        {drivers.map((driver) => {
+          const isEditing = editingId === driver.id
+          return (
+            <Card key={driver.id} className="hover:shadow-md transition-shadow w-full">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <User className="h-5 w-5 shrink-0" />
+                  {isEditing ? (
+                    <Input
+                      value={formData?.name || ""}
+                      onChange={e => handleChange("name", e.target.value)}
+                    />
+                  ) : (
+                    <span>{driver.name}</span>
+                  )}
+                </CardTitle>
+              </CardHeader>
 
-            <CardContent className="space-y-3">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <CreditCard className="h-4 w-4 shrink-0" />
-                <span>CPF: {driver.cpf}</span>
-              </div>
-
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Mail className="h-4 w-4 shrink-0" />
-                <span>{driver.email}</span>
-              </div>
-
-              <div className="pt-2">
-                <Badge variant={getPaymentTypeBadgeVariant(driver.paymentType)}>
-                  {getPaymentTypeLabel(driver.paymentType)}
-                </Badge>
-              </div>
-
-              <div className="flex items-center ml-10 gap-2 pt-3 border-t">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleGeneratePayroll(driver.id)}
-                  className="h-8 px-3 hover:bg-green-50 hover:text-green-600"
-                >
-                  <FileText className="h-4 w-4 mr-1" />
-                  Holerite Salarial
-                </Button>
-
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEdit(driver.id)}
-                    className="h-8 px-3 hover:bg-blue-50 hover:text-blue-600"
-                  >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Editar
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDelete(driver.id)}
-                    className="h-8 px-3 hover:bg-red-50 hover:text-red-600"
-                  >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Excluir
-                  </Button>
+              <CardContent className="space-y-3">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <CreditCard className="h-4 w-4 shrink-0" />
+                  {isEditing ? (
+                    <Input
+                      value={formData?.cpf || ""}
+                      onChange={e => handleChange("cpf", e.target.value)}
+                    />
+                  ) : (
+                    <span>CPF: {driver.cpf}</span>
+                  )}
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Mail className="h-4 w-4 shrink-0" />
+                  {isEditing ? (
+                    <Input
+                      value={formData?.email || ""}
+                      onChange={e => handleChange("email", e.target.value)}
+                    />
+                  ) : (
+                    <span>{driver.email}</span>
+                  )}
+                </div>
+
+                <div className="pt-2">
+                  {isEditing ? (
+                    <Select
+                      value={formData?.paymentType || ""}
+                      onValueChange={(value) => handleChange("paymentType", value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Tipo de Pagamento" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pagamento-fixo">Pagamento Fixo</SelectItem>
+                        <SelectItem value="pagamento-por-viagem">Pagamento por Viagem</SelectItem>
+                        <SelectItem value="outra-coisa">Outra Coisa</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Badge variant={getPaymentTypeBadgeVariant(driver.paymentType)}>
+                      {getPaymentTypeLabel(driver.paymentType)}
+                    </Badge>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap gap-2 pt-3 border-t">
+                  {isEditing ? (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={saveEdit}
+                        className="h-8 px-3 hover:bg-green-50 hover:text-green-600"
+                      >
+                        <Check className="h-4 w-4 mr-1" />
+                        Salvar
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={cancelEdit}
+                        className="h-8 px-3 hover:bg-gray-50 hover:text-gray-600"
+                      >
+                        <X className="h-4 w-4 mr-1" />
+                        Cancelar
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleGeneratePayroll(driver.id)}
+                        className="h-8 px-3 hover:bg-green-50 hover:text-green-600"
+                      >
+                        <FileText className="h-4 w-4 mr-1" />
+                        Holerite Salarial
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => startEdit(driver)}
+                        className="h-8 px-3 hover:bg-blue-50 hover:text-blue-600"
+                      >
+                        <Edit className="h-4 w-4 mr-1" />
+                        Editar
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(driver.id)}
+                        className="h-8 px-3 hover:bg-red-50 hover:text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Excluir
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )
+        })}
       </div>
     </div>
   )

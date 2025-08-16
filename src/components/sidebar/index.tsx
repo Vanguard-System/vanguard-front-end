@@ -26,12 +26,12 @@ const menuItems = [
   {
     title: "Carro",
     icon: Bus,
-    url: "#",
+    url: "Car",
   },
   {
     title: "Clientes",
     icon: Users,
-    url: "#",
+    url: "/Client",
   },
 ]
 

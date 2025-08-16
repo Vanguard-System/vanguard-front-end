@@ -9,37 +9,24 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 
-interface DriverData {
+interface ClientData {
   name: string
-  cpf: string
+  telefone: string
   email: string
-  paymentType: string
 }
 
-export function DriverRegistrationForm() {
-  const [formData, setFormData] = useState<DriverData>({
+export function FormClientRegister() {
+  const [formData, setFormData] = useState<ClientData>({
     name: "",
-    cpf: "",
+    telefone: "",
     email: "",
-    paymentType: "",
   })
+
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
-
-  const formatCPF = (value: string) => {
-    const numbers = value.replace(/\D/g, "")
-    return numbers
-      .slice(0, 11)
-      .replace(/(\d{3})(\d)/, "$1.$2")
-      .replace(/(\d{3})(\d)/, "$1.$2")
-      .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
-  }
-
-  const validateCPF = (cpf: string) => cpf.replace(/\D/g, "").length === 11
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 
-  const handleInputChange = (field: keyof DriverData, value: string) => {
-    if (field === "cpf") value = formatCPF(value)
+  const handleInputChange = (field: keyof ClientData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
@@ -50,27 +37,27 @@ export function DriverRegistrationForm() {
       toast({ title: "Erro", description: "Nome é obrigatório", variant: "destructive" })
       return
     }
-    if (!validateCPF(formData.cpf)) {
-      toast({ title: "Erro", description: "CPF inválido", variant: "destructive" })
+    
+    if (!formData.telefone) {
+      toast({ title: "Erro", description: "Telefone é obrigatório", variant: "destructive" })
       return
     }
+
     if (!validateEmail(formData.email)) {
       toast({ title: "Erro", description: "Email inválido", variant: "destructive" })
-      return
-    }
-    if (!formData.paymentType) {
-      toast({ title: "Erro", description: "Tipo de pagamento obrigatório", variant: "destructive" })
       return
     }
 
     setIsSubmitting(true)
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000))
-      toast({ title: "Sucesso", description: "Motorista cadastrado com sucesso" })
-      setFormData({ name: "", cpf: "", email: "", paymentType: "" })
-    } catch {
-      toast({ title: "Erro", description: "Falha ao cadastrar motorista", variant: "destructive" })
-    } finally {
+      toast({ title: "Sucesso", description: "Cliente cadastrado com sucesso" })
+      setFormData({ name: "", telefone: "", email: "" })
+    }
+     catch {
+      toast({ title: "Erro", description: "Falha ao cadastrar cliente", variant: "destructive" })
+    } 
+    finally {
       setIsSubmitting(false)
     }
   }
@@ -79,7 +66,7 @@ export function DriverRegistrationForm() {
     <div className="flex justify-center items-center w-full mt-16 ml-32">
       <Card className="w-full max-w-4xl">
         <CardHeader>
-          <CardTitle>Dados do Motorista</CardTitle>
+          <CardTitle>Dados do Cliente</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -95,17 +82,6 @@ export function DriverRegistrationForm() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="cpf">CPF</Label>
-                <Input
-                  id="cpf"
-                  type="text"
-                  placeholder="000.000.000-00"
-                  value={formData.cpf}
-                  onChange={(e) => handleInputChange("cpf", e.target.value)}
-                  maxLength={14}
-                />
-              </div>
-              <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
@@ -116,20 +92,14 @@ export function DriverRegistrationForm() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Tipo de Pagamento</Label>
-                <Select
-                  value={formData.paymentType}
-                  onValueChange={(value) => handleInputChange("paymentType", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o tipo de pagamento" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pagamento-fixo">Pagamento Fixo</SelectItem>
-                    <SelectItem value="pagamento-por-viagem">Pagamento por Viagem</SelectItem>
-                    <SelectItem value="outra-coisa">Outra Coisa</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="telefone">Telefone</Label>
+                <Input
+                  id="telefone"
+                  type="telefone"
+                  placeholder="(DDD) 999999999"
+                  value={formData.email}
+                  onChange={(e) => handleInputChange("email", e.target.value)}
+                />
               </div>
             </div>
             <Button type="submit" className="w-full" disabled={isSubmitting}>

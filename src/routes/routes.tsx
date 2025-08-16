@@ -3,8 +3,9 @@ import BasePage from "@/pages/BasePage";
 import Login from "@/pages/LoginPage";
 import Home from "@/pages/HomePage";
 import DrivePage from "@/pages/DriverPage";
-// import BudgetPage from "@/pages/BudgetPage";
-
+import CarPage from "@/pages/CarPage";
+import ClientPage from "@/pages/ClientPage";
+import SettingsPage from "@/pages/SettingsPage";
 
 export default function AppRoutes() {
   return (
@@ -15,6 +16,10 @@ export default function AppRoutes() {
         <Route path="/" element={<BasePage />}>
         <Route path="/Home" element={<Home />} />
         <Route path="/Driver" element={<DrivePage />} />
+        <Route path="/Car" element={<CarPage />} />
+        <Route path="/Client" element={< ClientPage/>} />
+        <Route path="/Settings" element={< SettingsPage />} />
+
 
         </Route>
       </Routes>
