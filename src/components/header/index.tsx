@@ -1,40 +1,30 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Settings, User, LogOut, Search } from "lucide-react"
+import { Settings, User, LogOut, Search, Menu, X, Home, Bus, Users } from "lucide-react"
 import { Link } from "react-router-dom"
 
+const menuItems = [
+  { title: "Home", icon: Home, url: "/Home" },
+  { title: "Motorista", icon: User, url: "/Driver" },
+  { title: "Carro", icon: Bus, url: "/Car" },
+  { title: "Clientes", icon: Users, url: "/Client" },
+]
+
 export default function Header() {
-  const [isDarkMode, setIsDarkMode] = useState(false)
-  const [notifications] = useState(3) // Simulando notificações
+  const [notifications] = useState(3)
   const [searchQuery, setSearchQuery] = useState("")
+  const [menuOpen, setMenuOpen] = useState(false)
 
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode)
-  }
-
-  const handleLogout = () => {
-    // Lógica de logout aqui
-    console.log("Saindo do sistema...")
-  }
-
+  const handleLogout = () => console.log("Saindo do sistema...")
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    if (searchQuery.trim()) {
-      console.log("Pesquisando por:", searchQuery)
-      // Aqui você pode implementar a lógica de pesquisa
-      // Por exemplo: redirecionar para uma página de resultados
-      // router.push(`/search?q=${encodeURIComponent(searchQuery)}`)
-    }
+    if (searchQuery.trim()) console.log("Pesquisando por:", searchQuery)
   }
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value)
-  }
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)
 
   return (
     <header className="fixed top-0 left-0 w-full bg-white border-b border-gray-200 shadow-sm z-50">
@@ -48,25 +38,30 @@ export default function Header() {
             <span className="ml-3 text-xl font-bold text-gray-900">Vanguard</span>
           </div>
 
-          <div className="flex-1 max-w-md mx-8">
+          {/* Busca Desktop */}
+          <div className="flex-1 mx-4 hidden sm:block">
             <form onSubmit={handleSearch} className="relative">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <Input
-                  type="text"
-                  placeholder="Pesquisar..."
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                  className="pl-10 pr-4 py-2 w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                type="text"
+                placeholder="Pesquisar..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                className="pl-10 pr-4 py-2 w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
             </form>
           </div>
 
-          {/* Direita - Informações do usuário e controles */}
-          <div className="flex items-center space-x-6">
-            {/* Informações do usuário */}
-            <div className="hidden md:flex items-center space-x-3">
+          {/* Hamburger Mobile */}
+          <div className="sm:hidden flex items-center">
+            <Button variant="ghost" onClick={() => setMenuOpen(!menuOpen)}>
+              {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </Button>
+          </div>
+
+          {/* Desktop Right */}
+          <div className="hidden sm:flex items-center space-x-6">
+            <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
                 <User className="w-4 h-4 text-gray-600" />
               </div>
@@ -76,34 +71,77 @@ export default function Header() {
               </div>
             </div>
 
-            {/* Separador */}
-            <div className="hidden md:block w-px h-6 bg-gray-300"></div>
+            <div className="w-px h-6 bg-gray-300"></div>
 
-            {/* Controles */}
-            <div className="flex items-center space-x-2">
-              {/* Configurações */}
-             <Link to="/Settings">
+            <Link to="/Settings">
               <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900">
                 <Settings className="w-4 h-4" />
               </Button>
-             </Link>
-            </div>
-          </div>
+            </Link>
 
-          {/* Botão de Logout */}
-         <Link to='/Login'>
-          <Button
-            onClick={handleLogout}
-            variant="outline"
-            size="sm"
-            className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 bg-transparent"
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            Sair
-          </Button>
-         </Link>
+            <Link to="/Login">
+              <Button
+                onClick={handleLogout}
+                variant="outline"
+                size="sm"
+                className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 bg-transparent"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sair
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
+
+      {/* Menu Mobile - agora contém o sidebar completo */}
+      {menuOpen && (
+        <div className="sm:hidden bg-white border-t border-gray-200 shadow-md px-4 py-3">
+          {/* Busca Mobile */}
+          <form onSubmit={handleSearch} className="mb-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                type="text"
+                placeholder="Pesquisar..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                className="pl-10 pr-4 py-2 w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          </form>
+
+          {/* Menu Items Mobile */}
+          <div className="flex flex-col space-y-2 mb-3">
+            {menuItems.map((item) => (
+              <Link key={item.title} to={item.url} onClick={() => setMenuOpen(false)}>
+                <Button variant="ghost" className="w-full flex items-center justify-start gap-2">
+                  <item.icon className="w-4 h-4" />
+                  {item.title}
+                </Button>
+              </Link>
+            ))}
+          </div>
+
+          {/* Configurações e Logout */}
+          <div className="flex flex-col space-y-2">
+            <Link to="/Settings">
+              <Button variant="ghost" className="w-full flex items-center justify-start gap-2">
+                <Settings className="w-4 h-4" /> Configurações
+              </Button>
+            </Link>
+            <Link to="/Login">
+              <Button
+                onClick={handleLogout}
+                variant="outline"
+                className="w-full flex items-center justify-start gap-2 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+              >
+                <LogOut className="w-4 h-4" /> Sair
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
     </header>
   )
 }

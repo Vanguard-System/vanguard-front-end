@@ -63,7 +63,7 @@ export function FormClientRegister() {
   }
 
   return (
-    <div className="flex justify-center items-center w-full mt-16 ml-32">
+    <div className="w-full flex justify-center mt-16 px-4 sm:px-6 lg:px-0">
       <Card className="w-full max-w-4xl">
         <CardHeader>
           <CardTitle>Dados do Cliente</CardTitle>

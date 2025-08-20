@@ -83,10 +83,10 @@ export function DriverCards() {
   }
 
   return (
-    <div className="ml-64 space-y-6 px-4 md:px-6 py-6 max-w-[1200px] mx-auto">
+    <div className="ml-0 md:ml-64 space-y-6 px-4 md:px-6 py-6 max-w-[1200px] mx-auto">
       <h2 className="text-2xl font-semibold">Motoristas Cadastrados</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {drivers.map((driver) => {
           const isEditing = editingId === driver.id
           return (

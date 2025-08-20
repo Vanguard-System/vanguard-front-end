@@ -49,8 +49,8 @@ export function CarCards() {
   }
 
   return (
-    <div className="ml-64 px-4 md:px-6 py-6 max-w-[1200px] mx-auto flex flex-col items-center space-y-6">
-      <h2 className="text-2xl font-semibold text-center">Carros cadastrados</h2>
+    <div className="ml-0 md:ml-64 space-y-6 px-4 md:px-6 py-6 max-w-[1200px] mx-auto">
+      <h2 className="text-2xl font-semibold">Carros cadastrados</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 justify-items-center w-full">
         {cars.map((car) => {
