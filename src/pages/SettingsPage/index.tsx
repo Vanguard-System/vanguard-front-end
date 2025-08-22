@@ -66,7 +66,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen ml-0 md:ml-44">
+    <div className="min-h-screen ml-0 md:ml-44 mt-5 mb-10">
       <Header />
 
       <main className="pt-16 px-4 sm:px-6 lg:px-8">
