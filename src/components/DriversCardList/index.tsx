@@ -18,7 +18,7 @@ interface Driver {
 
 const mockDrivers: Driver[] = [
   { id: "1", name: "João Silva Santos", cpf: "123.456.789-01", email: "joao.silva@email.com", paymentType: "pagamento-fixo" },
-  { id: "2", name: "Peter Parker", cpf: "987.654.321-09", email: "peterparker@email.com", paymentType: "pagamento-por-viagem" },
+  { id: "2", name: "Peter Parker", cpf: "987.654.321-09", email: "peterparker@email.com", paymentType: "pagamento-por-viagem" }, 
 ]
 
 const getPaymentTypeLabel = (type: string) => {
@@ -84,15 +84,15 @@ export function DriverCards() {
 
   return (
     <div className="ml-0 md:ml-64 space-y-6 px-4 md:px-6 py-6 max-w-[1200px] mx-auto">
-      <h2 className="text-2xl font-semibold">Motoristas Cadastrados</h2>
+      <h2 className="text-2xl font-semibold text-center">Motoristas Cadastrados</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="flex flex-wrap justify-center gap-6">
         {drivers.map((driver) => {
           const isEditing = editingId === driver.id
           return (
-            <Card key={driver.id} className="hover:shadow-md transition-shadow w-full">
+            <Card key={driver.id} className="hover:shadow-md transition-shadow w-full max-w-sm">
               <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-lg">
+                <CardTitle className="flex flex-col items-center gap-2 text-lg">
                   <User className="h-5 w-5 shrink-0" />
                   {isEditing ? (
                     <Input
@@ -105,7 +105,7 @@ export function DriverCards() {
                 </CardTitle>
               </CardHeader>
 
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-3 flex flex-col items-center">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <CreditCard className="h-4 w-4 shrink-0" />
                   {isEditing ? (
@@ -152,7 +152,7 @@ export function DriverCards() {
                   )}
                 </div>
 
-                <div className="flex flex-wrap gap-2 pt-3 border-t">
+                <div className="flex items-center gap-2 pt-3 border-t">
                   {isEditing ? (
                     <>
                       <Button

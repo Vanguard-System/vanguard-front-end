@@ -3,9 +3,9 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { MapPin, Car, User, Clock, Calendar, DollarSign, Users } from "lucide-react"
-import { Input } from "@/components/ui/input" // precisa ter esse componente no seu projeto
+import { Input } from "@/components/ui/input"
 
-interface Viagem {
+interface Orcamento {
   id: number
   preco: string
   origem: string
@@ -18,17 +18,18 @@ interface Viagem {
   status: string
 }
 
-interface ViagemCardProps {
-  viagem: Viagem
+interface OrcamentoCardProps {
+  orcamentos: Orcamento
+  lucroPercent?: number // percentual de lucro opcional, padrão 20%
 }
 
-export default function CardComponent({ viagem }: ViagemCardProps) {
+export default function BudgetCard({ orcamentos, lucroPercent = 20 }: OrcamentoCardProps) {
   const [isEditing, setIsEditing] = useState(false)
-  const [formData, setFormData] = useState(viagem)
+  const [formData, setFormData] = useState(orcamentos)
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Confirmada":
+      case "Aprovada":
         return "bg-green-100 text-green-800"
       case "Pendente":
         return "bg-yellow-100 text-yellow-800"
@@ -39,19 +40,26 @@ export default function CardComponent({ viagem }: ViagemCardProps) {
     }
   }
 
-  const handleChange = (field: keyof Viagem, value: string) => {
+  const handleChange = (field: keyof Orcamento, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
   const handleSave = () => {
-    // aqui você faria a chamada de API para salvar
     console.log("Salvando:", formData)
     setIsEditing(false)
   }
 
   const handleCancel = () => {
-    setFormData(viagem) // volta pro original
+    setFormData(orcamentos)
     setIsEditing(false)
+  }
+
+  // Calcula lucro baseado no valor do orçamento
+  const calcularLucro = () => {
+    const precoNum = parseFloat(formData.preco.replace(",", "."))
+    if (isNaN(precoNum)) return "0,00"
+    const lucro = precoNum * (lucroPercent / 100)
+    return lucro.toFixed(2).replace(".", ",")
   }
 
   return (
@@ -63,20 +71,6 @@ export default function CardComponent({ viagem }: ViagemCardProps) {
           <div className="flex items-center space-x-2">
             <span className="text-lg font-semibold text-gray-900">#{formData.id}</span>
             <Badge className={getStatusColor(formData.status)}>{formData.status}</Badge>
-          </div>
-          <div className="text-left sm:text-right">
-            <div className="flex items-center text-green-600 font-bold text-xl">
-              <DollarSign className="w-5 h-5 mr-1" />
-              {isEditing ? (
-                <Input
-                  value={formData.preco}
-                  onChange={e => handleChange("preco", e.target.value)}
-                  className="w-24"
-                />
-              ) : (
-                formData.preco
-              )}
-            </div>
           </div>
         </div>
 
@@ -205,32 +199,56 @@ export default function CardComponent({ viagem }: ViagemCardProps) {
         </div>
 
         {/* Botões */}
-        <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 mt-4 pt-4 border-t border-gray-200">
-          {isEditing ? (
-            <>
-              <Button size="sm" className="w-full sm:w-auto" onClick={handleSave}>
-                Salvar
-              </Button>
-              <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={handleCancel}>
-                Cancelar
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => setIsEditing(true)}>
-                Editar
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full sm:w-auto text-red-600 hover:text-red-700 bg-transparent"
-              >
-                Cancelar
-              </Button>
-            </>
-          )}
+        <div className="flex flex-col sm:flex-row justify-between space-y-2 sm:space-y-0 sm:space-x-2 mt-4 pt-4 border-t border-gray-200">
+          {/* Div da esquerda - Preço + Lucro */}
+          <div className="flex items-center space-x-10">
+            <div className="flex items-center text-green-600 font-bold text-xl">
+              <DollarSign className="w-5 h-5 mr-1" />
+              {isEditing ? (
+                <Input
+                  value={formData.preco}
+                  onChange={e => handleChange("preco", e.target.value)}
+                  className="w-24"
+                />
+              ) : (
+                formData.preco
+              )}
+            </div>
+            <div className="flex items-center text-blue-600 font-medium">
+              <span className="mr-1">Lucro:</span>
+              {calcularLucro()}
+            </div>
+          </div>
+
+          {/* Div da direita - Botões */}
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+            {isEditing ? (
+              <>
+                <Button size="sm" className="w-full sm:w-auto" onClick={handleSave}>
+                  Salvar
+                </Button>
+                <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={handleCancel}>
+                  Cancelar
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => setIsEditing(true)}>
+                  Editar
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full sm:w-auto text-red-600 hover:text-red-700 bg-transparent"
+                >
+                  Cancelar
+                </Button>
+              </>
+            )}
+          </div>
         </div>
 
+  
       </CardContent>
     </Card>
   )

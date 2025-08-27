@@ -76,7 +76,8 @@ export function DriverRegistrationForm() {
   }
 
   return (
-    <div className="w-full flex justify-center mt-16 px-4 sm:px-6 lg:px-0">
+    <div className="flex justify-center mt-24 px-4 sm:px-6 lg:px-0 ml-0 md:ml-64">
+
   <Card className="w-full max-w-4xl mx-auto">
     <CardHeader>
       <CardTitle>Dados do Motorista</CardTitle>
