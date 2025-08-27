@@ -26,13 +26,18 @@ const menuItems = [
   {
     title: "Carro",
     icon: Bus,
-    url: "Car",
+    url: "/Car",
   },
   {
     title: "Clientes",
     icon: Users,
     url: "/Client",
   },
+  {
+    title: "Orçamentos",
+    icon: FileText,
+    url: "/Budget"
+  }
 ]
 
 export default function SidebarApp() {

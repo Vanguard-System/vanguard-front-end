@@ -12,6 +12,7 @@ const menuItems = [
   { title: "Motorista", icon: User, url: "/Driver" },
   { title: "Carro", icon: Bus, url: "/Car" },
   { title: "Clientes", icon: Users, url: "/Client" },
+  { title: "Orçamentos", icon: Users, url: "/Budget" },
 ]
 
 export default function Header() {
