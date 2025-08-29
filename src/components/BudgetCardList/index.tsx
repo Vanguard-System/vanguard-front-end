@@ -2,8 +2,12 @@ import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MapPin, Car, User, Clock, Calendar, DollarSign, Users } from "lucide-react"
+import { MapPin, Car, User, Clock, Calendar, DollarSign, Users, FileText, MessageSquare } from "lucide-react"
 import { Input } from "@/components/ui/input"
+import BudgetReceipt from "@/components/BudgetReceipt"
+import { pdf } from "@react-pdf/renderer"
+import { saveAs } from "file-saver"
+
 
 interface Orcamento {
   id: number
@@ -61,6 +65,24 @@ export default function BudgetCard({ orcamentos, lucroPercent = 20 }: OrcamentoC
     const lucro = precoNum * (lucroPercent / 100)
     return lucro.toFixed(2).replace(".", ",")
   }
+
+  const gerarLinkWhatsApp = (orcamento: any) => {
+    const mensagem = `Olá ${orcamento.cliente}, aqui está seu orçamento:
+  
+    Origem: ${orcamento.origem}
+    Destino: ${orcamento.destino}
+    Carro: ${orcamento.carro}
+    Motorista: ${orcamento.motorista}
+    Data/Hora: ${orcamento.dia} às ${orcamento.hora}
+    Preço: ${orcamento.preco}
+
+    Por favor, confirme para seguirmos com a reserva.`;
+
+    const numero = "" 
+
+    return `https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`
+  }
+
 
   return (
     <Card className="hover:shadow-md transition-shadow">
@@ -220,26 +242,77 @@ export default function BudgetCard({ orcamentos, lucroPercent = 20 }: OrcamentoC
             </div>
           </div>
 
+
+
+
           {/* Div da direita - Botões */}
           <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2 border text-black hover:bg-green-50 hover:text-green-600"
+              onClick={() => window.open(gerarLinkWhatsApp(orcamentos), "_blank")}
+            >
+              <MessageSquare className="w-4 h-4 text-green-500" />
+              Enviar no WhatsApp
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2 border text-black hover:bg-green-50 hover:text-green-600"
+              onClick={async () => {
+                const dados = {
+                  passageiro: orcamentos.motorista,
+                  documento: "123.456.789-00",
+                  origem: formData.origem,
+                  destino: formData.destino,
+                  dia: formData.dia,
+                  hora: formData.hora,
+                  preco: parseFloat(formData.preco.replace("R$", "").replace(",", ".")),
+                }
+
+                const blob = await pdf(<BudgetReceipt dados={dados} />).toBlob()
+                saveAs(blob, `ticket-${dados.passageiro}-${dados.dia}.pdf`)
+              }}
+            >
+              <FileText className="w-4 h-4" />
+              Holerite
+            </Button>
+
             {isEditing ? (
               <>
-                <Button size="sm" className="w-full sm:w-auto" onClick={handleSave}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2 border text-black hover:bg-green-50 hover:text-green-600"
+                  onClick={handleSave}
+                >
                   Salvar
                 </Button>
-                <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={handleCancel}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2 border text-gray-600 hover:bg-gray-100"
+                  onClick={handleCancel}
+                >
                   Cancelar
                 </Button>
               </>
             ) : (
               <>
-                <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => setIsEditing(true)}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2 border text-black hover:bg-blue-50 hover:text-blue-600"
+                  onClick={() => setIsEditing(true)}
+                >
                   Editar
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-full sm:w-auto text-red-600 hover:text-red-700 bg-transparent"
+                  className="flex items-center gap-2 border text-red-600 hover:bg-red-50"
                 >
                   Cancelar
                 </Button>
