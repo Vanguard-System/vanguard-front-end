@@ -8,6 +8,11 @@ import { User, Mail, CreditCard, Edit, Trash2, FileText, Check, X } from "lucide
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
+// libs para gerar pdf
+import { pdf } from "@react-pdf/renderer"
+import { saveAs } from "file-saver"
+import RemunerationReceipt from "../RemunerationReceipt"
+
 interface Driver {
   id: string
   name: string
@@ -18,7 +23,7 @@ interface Driver {
 
 const mockDrivers: Driver[] = [
   { id: "1", name: "João Silva Santos", cpf: "123.456.789-01", email: "joao.silva@email.com", paymentType: "pagamento-fixo" },
-  { id: "2", name: "Peter Parker", cpf: "987.654.321-09", email: "peterparker@email.com", paymentType: "pagamento-por-viagem" }, 
+  { id: "2", name: "Peter Parker", cpf: "987.654.321-09", email: "peterparker@email.com", paymentType: "pagamento-por-viagem" },
 ]
 
 const getPaymentTypeLabel = (type: string) => {
@@ -78,8 +83,19 @@ export function DriverCards() {
     setDrivers(prev => prev.filter(d => d.id !== id))
   }
 
-  const handleGeneratePayroll = (id: string) => {
-    console.log("Gerar holerite para motorista:", id)
+  const handleGeneratePayroll = async (driver: Driver) => {
+    // exemplo mockado: valores poderiam vir de um banco ou cálculo
+    const dados = {
+      funcionario: driver.name,
+      mes: "08",
+      ano: "2025",
+      viagens: { quantidade: 10, valor: 150 }, // 10 viagens de 150 cada
+      alimentacao: 500,
+      extras: 200,
+    }
+
+    const blob = await pdf(<RemunerationReceipt dados={dados} />).toBlob()
+    saveAs(blob, `holerite-${driver.name}-${dados.mes}-${dados.ano}.pdf`)
   }
 
   return (
@@ -179,7 +195,7 @@ export function DriverCards() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleGeneratePayroll(driver.id)}
+                        onClick={() => handleGeneratePayroll(driver)}
                         className="h-8 px-3 hover:bg-green-50 hover:text-green-600"
                       >
                         <FileText className="h-4 w-4 mr-1" />
