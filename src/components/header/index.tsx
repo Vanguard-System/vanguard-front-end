@@ -5,7 +5,8 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Settings, User, LogOut, Search, Menu, X, Home, Bus, Users } from "lucide-react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import { logout } from "@/services/auth"
 
 const menuItems = [
   { title: "Home", icon: Home, url: "/Home" },
@@ -19,8 +20,13 @@ export default function Header() {
   const [notifications] = useState(3)
   const [searchQuery, setSearchQuery] = useState("")
   const [menuOpen, setMenuOpen] = useState(false)
+  const navigate = useNavigate();
 
-  const handleLogout = () => console.log("Saindo do sistema...")
+  const handleLogout = async () => {
+    await logout(); 
+    navigate('/login');
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     if (searchQuery.trim()) console.log("Pesquisando por:", searchQuery)

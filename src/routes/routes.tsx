@@ -7,22 +7,29 @@ import CarPage from "@/pages/CarPage";
 import ClientPage from "@/pages/ClientPage";
 import SettingsPage from "@/pages/SettingsPage";
 import BudgetPage from "@/pages/BudgetPage";
+import PrivateRoute from "@/components/PrivateRoute";
 
 export default function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<Login />} /> 
+        <Route path="/login" element={<Login />} />
 
-        <Route path="/" element={<BasePage />}>
-        <Route path="/Home" element={<Home />} />
-        <Route path="/Driver" element={<DrivePage />} />
-        <Route path="/Car" element={<CarPage />} />
-        <Route path="/Client" element={< ClientPage/>} />
-        <Route path="/Settings" element={< SettingsPage />} />
-        <Route path="/Budget" element={< BudgetPage />} />
-
-
+        <Route
+          path="/"
+          element={
+            <PrivateRoute>
+              <BasePage /> 
+            </PrivateRoute>
+          }
+        >
+          <Route index element={<Home />} /> 
+          <Route path="Home" element={<Home />} />
+          <Route path="Driver" element={<DrivePage />} />
+          <Route path="Car" element={<CarPage />} />
+          <Route path="Client" element={<ClientPage />} />
+          <Route path="Settings" element={<SettingsPage />} />
+          <Route path="Budget" element={<BudgetPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
