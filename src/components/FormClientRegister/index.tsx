@@ -53,15 +53,18 @@ export function FormClientRegister() {
     }
 
     setIsSubmitting(true)
+   
     try {
       await createClientMutation.mutateAsync(formData)
       toast({ title: "Sucesso", description: "Cliente cadastrado com sucesso" })
       setFormData({ name: "", email: "", telephone: "" })
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Erro ao cadastrar cliente:", error) // <-- loga o erro real
       toast({ title: "Erro", description: "Falha ao cadastrar cliente", variant: "destructive" })
     } finally {
       setIsSubmitting(false)
     }
+
   }
 
   return (
