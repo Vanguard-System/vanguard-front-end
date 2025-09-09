@@ -21,14 +21,14 @@ export function FormClientRegister() {
     email: "",
     telephone: "",
   })
-
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
   const createClientMutation = useCreateClient()
 
   const validateEmail = (email: string) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)
+    return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
   }
+
 
   const handleInputChange = (field: keyof ClientData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
