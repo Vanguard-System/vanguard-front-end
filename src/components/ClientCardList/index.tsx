@@ -4,22 +4,24 @@ import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { User, Mail, CreditCard, Edit, Trash2, Check, X } from "lucide-react"
-import { Input } from "@/components/ui/input" // precisa ter esse componente
+import { Input } from "@/components/ui/input"
+import { useToast } from "@/hooks/use-toast"
+import { useClient, useDeleteClient, useUpdateClient } from "@/services/hooks/useClient"
+
 
 interface Client {
   id: string
-  nome: string
-  telefone: string
+  name: string
+  telephone: string
   email: string
 }
 
-const mockClient: Client[] = [
-  { id: "1", nome: "Batman", telefone: "8771497498", email: "batman@gmail.com" },
-  { id: "2", nome: "Spiderman", telefone: "1282175442", email: "spiderman@gmail.com" },
-]
-
 export function ClientCards() {
-  const [clients, setClients] = useState<Client[]>(mockClient)
+  const { data: clients = [] } = useClient()
+  const updateClientMutation = useUpdateClient()
+  const deleteClientMutation = useDeleteClient()
+  const { toast } = useToast()
+
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState<Client | null>(null)
 
@@ -33,20 +35,29 @@ export function ClientCards() {
     setFormData(null)
   }
 
-  const saveEdit = () => {
-    if (formData) {
-      setClients(prev => prev.map(c => (c.id === formData.id ? formData : c)))
+  const saveEdit = async () => {
+    if (!formData) return
+    try {
+      await updateClientMutation.mutateAsync({ id: formData.id, data: formData })
+      toast({ title: "Sucesso", description: "Cliente atualizado com sucesso" })
+      cancelEdit()
+    } catch {
+      toast({ title: "Erro", description: "Falha ao atualizar cliente", variant: "destructive" })
     }
-    cancelEdit()
   }
 
   const handleChange = (field: keyof Client, value: string) => {
     if (!formData) return
-    setFormData(prev => prev ? { ...prev, [field]: value } : null)
+    setFormData(prev => (prev ? { ...prev, [field]: value } : null))
   }
 
-  const handleDelete = (id: string) => {
-    setClients(prev => prev.filter(c => c.id !== id))
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteClientMutation.mutateAsync(id)
+      toast({ title: "Sucesso", description: "Cliente deletado com sucesso" })
+    } catch {
+      toast({ title: "Erro", description: "Falha ao deletar cliente", variant: "destructive" })
+    }
   }
 
   return (
@@ -54,8 +65,7 @@ export function ClientCards() {
       <h2 className="text-2xl font-semibold text-center">Clientes cadastrados</h2>
 
       <div className="flex flex-wrap justify-center gap-6">
-
-        {clients.map((client) => {
+        {clients.map((client: Client) => {
           const isEditing = editingId === client.id
           return (
             <Card key={client.id} className="hover:shadow-md transition-shadow w-full max-w-sm">
@@ -64,12 +74,12 @@ export function ClientCards() {
                   <User className="h-5 w-5 shrink-0" />
                   {isEditing ? (
                     <Input
-                      value={formData?.nome || ""}
-                      onChange={e => handleChange("nome", e.target.value)}
+                      value={formData?.name || ""}
+                      onChange={e => handleChange("name", e.target.value)}
                       className="text-center"
                     />
                   ) : (
-                    <span>{client.nome}</span>
+                    <span>{client.name}</span>
                   )}
                 </CardTitle>
               </CardHeader>
@@ -79,11 +89,11 @@ export function ClientCards() {
                   <CreditCard className="h-4 w-4 shrink-0" />
                   {isEditing ? (
                     <Input
-                      value={formData?.telefone || ""}
-                      onChange={e => handleChange("telefone", e.target.value)}
+                      value={formData?.telephone || ""}
+                      onChange={e => handleChange("telephone", e.target.value)}
                     />
                   ) : (
-                    <span>Telefone: {client.telefone}</span>
+                    <span>Telefone: {client.telephone}</span>
                   )}
                 </div>
 

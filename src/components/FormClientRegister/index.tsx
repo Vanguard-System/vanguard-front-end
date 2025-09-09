@@ -1,33 +1,37 @@
 "use client"
 
-import type React from "react"
 import { useState } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
+import { useCreateClient } from "@/services/hooks/useClient"
+
 
 interface ClientData {
   name: string
-  telefone: string
   email: string
+  telephone: string
 }
 
 export function FormClientRegister() {
   const [formData, setFormData] = useState<ClientData>({
     name: "",
-    telefone: "",
     email: "",
+    telephone: "",
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
-  const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  const createClientMutation = useCreateClient()
+
+  const validateEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)
+  }
 
   const handleInputChange = (field: keyof ClientData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
+    setFormData(prev => ({ ...prev, [field]: value }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,8 +41,8 @@ export function FormClientRegister() {
       toast({ title: "Erro", description: "Nome é obrigatório", variant: "destructive" })
       return
     }
-    
-    if (!formData.telefone) {
+
+    if (!formData.telephone.trim()) {
       toast({ title: "Erro", description: "Telefone é obrigatório", variant: "destructive" })
       return
     }
@@ -50,14 +54,12 @@ export function FormClientRegister() {
 
     setIsSubmitting(true)
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await createClientMutation.mutateAsync(formData)
       toast({ title: "Sucesso", description: "Cliente cadastrado com sucesso" })
-      setFormData({ name: "", telefone: "", email: "" })
-    }
-     catch {
+      setFormData({ name: "", email: "", telephone: "" })
+    } catch (error) {
       toast({ title: "Erro", description: "Falha ao cadastrar cliente", variant: "destructive" })
-    } 
-    finally {
+    } finally {
       setIsSubmitting(false)
     }
   }
@@ -78,7 +80,7 @@ export function FormClientRegister() {
                   type="text"
                   placeholder="Digite o nome completo"
                   value={formData.name}
-                  onChange={(e) => handleInputChange("name", e.target.value)}
+                  onChange={e => handleInputChange("name", e.target.value)}
                 />
               </div>
               <div className="space-y-2">
@@ -88,22 +90,22 @@ export function FormClientRegister() {
                   type="email"
                   placeholder="exemplo@email.com"
                   value={formData.email}
-                  onChange={(e) => handleInputChange("email", e.target.value)}
+                  onChange={e => handleInputChange("email", e.target.value)}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="telefone">Telefone</Label>
+                <Label htmlFor="telephone">Telefone</Label>
                 <Input
-                  id="telefone"
-                  type="telefone"
+                  id="telephone"
+                  type="text"
                   placeholder="(DDD) 999999999"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange("email", e.target.value)}
+                  value={formData.telephone}
+                  onChange={e => handleInputChange("telephone", e.target.value)}
                 />
               </div>
             </div>
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Cadastrando..." : "Cadastrar Motorista"}
+              {isSubmitting ? "Cadastrando..." : "Cadastrar Cliente"}
             </Button>
           </form>
         </CardContent>
