@@ -21,14 +21,14 @@ export function FormClientRegister() {
     email: "",
     telephone: "",
   })
-
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
   const createClientMutation = useCreateClient()
 
   const validateEmail = (email: string) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)
+    return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
   }
+
 
   const handleInputChange = (field: keyof ClientData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -53,15 +53,18 @@ export function FormClientRegister() {
     }
 
     setIsSubmitting(true)
+   
     try {
       await createClientMutation.mutateAsync(formData)
       toast({ title: "Sucesso", description: "Cliente cadastrado com sucesso" })
       setFormData({ name: "", email: "", telephone: "" })
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Erro ao cadastrar cliente:", error) // <-- loga o erro real
       toast({ title: "Erro", description: "Falha ao cadastrar cliente", variant: "destructive" })
     } finally {
       setIsSubmitting(false)
     }
+
   }
 
   return (
