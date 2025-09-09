@@ -26,8 +26,9 @@ export function FormClientRegister() {
   const { toast } = useToast()
   const createClientMutation = useCreateClient()
 
-  const validateEmail = (email: string) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  const validateEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)
+  }
 
   const handleInputChange = (field: keyof ClientData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))

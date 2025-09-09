@@ -65,7 +65,7 @@ export function ClientCards() {
       <h2 className="text-2xl font-semibold text-center">Clientes cadastrados</h2>
 
       <div className="flex flex-wrap justify-center gap-6">
-        {clients.map(client => {
+        {clients.map((client: Client) => {
           const isEditing = editingId === client.id
           return (
             <Card key={client.id} className="hover:shadow-md transition-shadow w-full max-w-sm">
