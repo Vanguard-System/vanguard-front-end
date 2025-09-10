@@ -4,21 +4,22 @@ import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { User, CreditCard, Edit, Trash2, Check, X } from "lucide-react"
-import { Input } from "@/components/ui/input" // precisa existir no seu projeto
+import { Input } from "@/components/ui/input"
+import { useToast } from "@/hooks/use-toast"
+import { useCar, useUpdateCar, useDeleteCar } from "@/services/hooks/useCar"
 
 interface Car {
   id: string
-  modelo: string
-  placa: string
+  model: string
+  plate: string
 }
 
-const mockCar: Car[] = [
-  { id: "1", modelo: "Red Bull Oracle", placa: "Verstappen" },
-  { id: "2", modelo: "Mclaren", placa: "Senna" },
-]
-
 export function CarCards() {
-  const [cars, setCars] = useState<Car[]>(mockCar)
+  const { data: cars = [] } = useCar()
+  const updateCarMutation = useUpdateCar()
+  const deleteCarMutation = useDeleteCar()
+  const { toast } = useToast()
+
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState<Car | null>(null)
 
@@ -32,11 +33,15 @@ export function CarCards() {
     setFormData(null)
   }
 
-  const saveEdit = () => {
-    if (formData) {
-      setCars(prev => prev.map(c => (c.id === formData.id ? formData : c)))
+  const saveEdit = async () => {
+    if (!formData) return
+    try {
+      await updateCarMutation.mutateAsync({ id: formData.id, data: formData })
+      toast({ title: "Sucesso", description: "Carro atualizado com sucesso" })
+      cancelEdit()
+    } catch {
+      toast({ title: "Erro", description: "Falha ao atualizar carro", variant: "destructive" })
     }
-    cancelEdit()
   }
 
   const handleChange = (field: keyof Car, value: string) => {
@@ -44,8 +49,13 @@ export function CarCards() {
     setFormData(prev => (prev ? { ...prev, [field]: value } : null))
   }
 
-  const handleDelete = (id: string) => {
-    setCars(prev => prev.filter(c => c.id !== id))
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteCarMutation.mutateAsync(id)
+      toast({ title: "Sucesso", description: "Carro deletado com sucesso" })
+    } catch {
+      toast({ title: "Erro", description: "Falha ao deletar carro", variant: "destructive" })
+    }
   }
 
   return (
@@ -53,7 +63,7 @@ export function CarCards() {
       <h2 className="text-2xl font-semibold text-center">Carros cadastrados</h2>
 
       <div className="flex flex-wrap justify-center gap-6">
-        {cars.map((car) => {
+        {cars.map((car: Car) => {
           const isEditing = editingId === car.id
           return (
             <Card key={car.id} className="hover:shadow-md transition-shadow w-full max-w-sm">
@@ -62,12 +72,12 @@ export function CarCards() {
                   <User className="h-5 w-5 shrink-0" />
                   {isEditing ? (
                     <Input
-                      value={formData?.modelo || ""}
-                      onChange={e => handleChange("modelo", e.target.value)}
+                      value={formData?.model || ""}
+                      onChange={e => handleChange("model", e.target.value)}
                       className="text-center"
                     />
                   ) : (
-                    <span>{car.modelo}</span>
+                    <span>{car.model}</span>
                   )}
                 </CardTitle>
               </CardHeader>
@@ -77,11 +87,11 @@ export function CarCards() {
                   <CreditCard className="h-4 w-4 shrink-0" />
                   {isEditing ? (
                     <Input
-                      value={formData?.placa || ""}
-                      onChange={e => handleChange("placa", e.target.value)}
+                      value={formData?.plate || ""}
+                      onChange={e => handleChange("plate", e.target.value)}
                     />
                   ) : (
-                    <span>Placa: {car.placa}</span>
+                    <span>Placa: {car.plate}</span>
                   )}
                 </div>
 
