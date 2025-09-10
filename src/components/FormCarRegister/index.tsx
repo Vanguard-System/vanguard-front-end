@@ -7,19 +7,21 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
+import { useCreateCar } from "@/services/hooks/useCar"
 
 interface CarData {
-  modelo: string
-  placa: string
+  model: string
+  plate: string
 }
 
 export function CarRegisterForm() {
   const [formData, setFormData] = useState<CarData>({
-    modelo: "",
-    placa: "",
+    model: "",
+    plate: "",
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
+  const createCarMutation = useCreateCar()
 
   const handleInputChange = (field: keyof CarData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -28,12 +30,12 @@ export function CarRegisterForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!formData.modelo.trim()) {
+    if (!formData.model.trim()) {
       toast({ title: "Erro", description: "Modelo é obrigatório", variant: "destructive" })
       return
     }
 
-    if (!formData.placa) {
+    if (!formData.plate) {
       toast({ title: "Erro", description: "Placa é obrigatório", variant: "destructive" })
       return
     }
@@ -41,11 +43,11 @@ export function CarRegisterForm() {
     setIsSubmitting(true)
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      toast({ title: "Sucesso", description: "Carro cadastrado com sucesso" })
-      setFormData({ modelo: "", placa: "" })
+      await createCarMutation.mutateAsync(formData)
+      toast({ title: "Sucesso", description: "Cliente cadastrado com sucesso" })
     } 
     catch {
+      setFormData({ model: "", plate: "" })
       toast({ title: "Erro", description: "Falha ao cadastrar carro", variant: "destructive" })
     } 
     finally {
@@ -68,8 +70,8 @@ export function CarRegisterForm() {
                   id="name"
                   type="text"
                   placeholder="Digite o modelo do carro"
-                  value={formData.modelo}
-                  onChange={(e) => handleInputChange("modelo", e.target.value)}
+                  value={formData.model}
+                  onChange={(e) => handleInputChange("model", e.target.value)}
                 />
               </div>
               <div className="space-y-2">
@@ -78,8 +80,8 @@ export function CarRegisterForm() {
                   id="cpf"
                   type="text"
                   placeholder="Digite a placa do carro"
-                  value={formData.placa}
-                  onChange={(e) => handleInputChange("placa", e.target.value)}
+                  value={formData.plate}
+                  onChange={(e) => handleInputChange("plate", e.target.value)}
                   maxLength={14}
                 />
               </div>
