@@ -39,10 +39,9 @@ export default function Header() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">V</span>
+            <div className="w-14 h-10 bg-gradient-to-r rounded-lg flex items-center justify-center">
+              <img src="src/assets/logo.png" alt="Descrição da imagem" />
             </div>
-            <span className="ml-3 text-xl font-bold text-gray-900">Vanguard</span>
           </div>
 
           {/* Busca Desktop */}
