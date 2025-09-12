@@ -8,7 +8,6 @@ import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
 import { useCreateClient } from "@/services/hooks/useClient"
 
-
 interface ClientData {
   name: string
   email: string
@@ -25,10 +24,7 @@ export function FormClientRegister() {
   const { toast } = useToast()
   const createClientMutation = useCreateClient()
 
-  const validateEmail = (email: string) => {
-    return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
-  }
-
+  const validateEmail = (email: string) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)
 
   const handleInputChange = (field: keyof ClientData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -36,47 +32,42 @@ export function FormClientRegister() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
     if (!formData.name.trim()) {
       toast({ title: "Erro", description: "Nome é obrigatório", variant: "destructive" })
       return
     }
-
     if (!formData.telephone.trim()) {
       toast({ title: "Erro", description: "Telefone é obrigatório", variant: "destructive" })
       return
     }
-
     if (!validateEmail(formData.email)) {
       toast({ title: "Erro", description: "Email inválido", variant: "destructive" })
       return
     }
 
     setIsSubmitting(true)
-   
     try {
       await createClientMutation.mutateAsync(formData)
       toast({ title: "Sucesso", description: "Cliente cadastrado com sucesso" })
       setFormData({ name: "", email: "", telephone: "" })
     } catch (error: any) {
-      console.error("Erro ao cadastrar cliente:", error) // <-- loga o erro real
+      console.error(error)
       toast({ title: "Erro", description: "Falha ao cadastrar cliente", variant: "destructive" })
     } finally {
       setIsSubmitting(false)
     }
-
   }
 
   return (
-    <div className="flex justify-center mt-24 px-4 sm:px-6 lg:px-0 ml-0 md:ml-64">
-      <Card className="w-full max-w-4xl">
+    <div className="flex flex-1 p-4 md:p-6 ml-0 mt-20 md:ml-64">
+      <Card className="w-full">
         <CardHeader>
           <CardTitle>Dados do Cliente</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
+              <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="name">Nome Completo</Label>
                 <Input
                   id="name"
