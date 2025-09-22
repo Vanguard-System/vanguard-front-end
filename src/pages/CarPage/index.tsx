@@ -1,4 +1,4 @@
-import { CarCards } from "@/components/CarCardList";
+import { CarDataGrid } from "@/components/CarDataGrid";
 import { CarRegisterForm } from "@/components/FormCarRegister";
 
 export default function CarPage() {
@@ -8,7 +8,7 @@ export default function CarPage() {
         <CarRegisterForm />
       </div>
       <div>
-        <CarCards />
+        <CarDataGrid />
       </div>
     </div>
   )

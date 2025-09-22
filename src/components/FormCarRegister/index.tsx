@@ -1,6 +1,5 @@
 "use client"
 
-import type React from "react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -24,7 +23,7 @@ export function CarRegisterForm() {
   const createCarMutation = useCreateCar()
 
   const handleInputChange = (field: keyof CarData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
+    setFormData(prev => ({ ...prev, [field]: value }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,8 +34,8 @@ export function CarRegisterForm() {
       return
     }
 
-    if (!formData.plate) {
-      toast({ title: "Erro", description: "Placa é obrigatório", variant: "destructive" })
+    if (!formData.plate.trim()) {
+      toast({ title: "Erro", description: "Placa é obrigatória", variant: "destructive" })
       return
     }
 
@@ -44,50 +43,48 @@ export function CarRegisterForm() {
 
     try {
       await createCarMutation.mutateAsync(formData)
-      toast({ title: "Sucesso", description: "Cliente cadastrado com sucesso" })
-    } 
-    catch {
+      toast({ title: "Sucesso", description: "Carro cadastrado com sucesso" })
       setFormData({ model: "", plate: "" })
+    } catch {
       toast({ title: "Erro", description: "Falha ao cadastrar carro", variant: "destructive" })
-    } 
-    finally {
+    } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <div className="flex justify-center mt-24 px-4 sm:px-6 lg:px-0 ml-0 md:ml-64">
-      <Card className="w-full max-w-4xl mx-auto">
+    <div className="flex flex-1 p-4 md:p-6 ml-0 mt-20 md:ml-64">
+      <Card className="w-full">
         <CardHeader>
-          <CardTitle>Dados do carro</CardTitle>
+          <CardTitle>Dados do Carro</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="modelo">Modelo</Label>
+                <Label htmlFor="model">Modelo</Label>
                 <Input
-                  id="name"
+                  id="model"
                   type="text"
                   placeholder="Digite o modelo do carro"
                   value={formData.model}
-                  onChange={(e) => handleInputChange("model", e.target.value)}
+                  onChange={e => handleInputChange("model", e.target.value)}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="modelo">Placa</Label>
+                <Label htmlFor="plate">Placa</Label>
                 <Input
-                  id="cpf"
+                  id="plate"
                   type="text"
                   placeholder="Digite a placa do carro"
                   value={formData.plate}
-                  onChange={(e) => handleInputChange("plate", e.target.value)}
-                  maxLength={14}
+                  onChange={e => handleInputChange("plate", e.target.value)}
+                  maxLength={10}
                 />
               </div>
             </div>
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Cadastrando..." : "Cadastrar carro"}
+              {isSubmitting ? "Cadastrando..." : "Cadastrar Carro"}
             </Button>
           </form>
         </CardContent>

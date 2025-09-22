@@ -1,6 +1,5 @@
 "use client"
 
-import type React from "react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -40,7 +39,7 @@ export function DriverRegistrationForm() {
 
   const handleInputChange = (field: keyof DriverData, value: string) => {
     if (field === "cpf") value = formatCPF(value)
-    setFormData((prev) => ({ ...prev, [field]: value }))
+    setFormData(prev => ({ ...prev, [field]: value }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -65,7 +64,7 @@ export function DriverRegistrationForm() {
 
     setIsSubmitting(true)
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await new Promise(resolve => setTimeout(resolve, 1000))
       toast({ title: "Sucesso", description: "Motorista cadastrado com sucesso" })
       setFormData({ name: "", cpf: "", email: "", paymentType: "" })
     } catch {
@@ -76,69 +75,68 @@ export function DriverRegistrationForm() {
   }
 
   return (
-    <div className="flex justify-center mt-24 px-4 sm:px-6 lg:px-0 ml-0 md:ml-64">
-
-  <Card className="w-full max-w-4xl mx-auto">
-    <CardHeader>
-      <CardTitle>Dados do Motorista</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Nome Completo</Label>
-            <Input
-              id="name"
-              type="text"
-              placeholder="Digite o nome completo"
-              value={formData.name}
-              onChange={(e) => handleInputChange("name", e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="cpf">CPF</Label>
-            <Input
-              id="cpf"
-              type="text"
-              placeholder="000.000.000-00"
-              value={formData.cpf}
-              onChange={(e) => handleInputChange("cpf", e.target.value)}
-              maxLength={14}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="exemplo@email.com"
-              value={formData.email}
-              onChange={(e) => handleInputChange("email", e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Tipo de Pagamento</Label>
-            <Select
-              value={formData.paymentType}
-              onValueChange={(value) => handleInputChange("paymentType", value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o tipo de pagamento" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pagamento-fixo">Pagamento Fixo</SelectItem>
-                <SelectItem value="pagamento-por-viagem">Pagamento por Viagem</SelectItem>
-                <SelectItem value="outra-coisa">Outra Coisa</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        <Button type="submit" className="w-full sm:w-auto" disabled={isSubmitting}>
-          {isSubmitting ? "Cadastrando..." : "Cadastrar Motorista"}
-        </Button>
-      </form>
-    </CardContent>
-  </Card>
-</div>
+    <div className="flex flex-1 p-4 md:p-6 ml-0 mt-20 md:ml-64">
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>Dados do Motorista</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Nome Completo</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="Digite o nome completo"
+                  value={formData.name}
+                  onChange={e => handleInputChange("name", e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cpf">CPF</Label>
+                <Input
+                  id="cpf"
+                  type="text"
+                  placeholder="000.000.000-00"
+                  value={formData.cpf}
+                  onChange={e => handleInputChange("cpf", e.target.value)}
+                  maxLength={14}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="exemplo@email.com"
+                  value={formData.email}
+                  onChange={e => handleInputChange("email", e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="paymentType">Tipo de Pagamento</Label>
+                <Select
+                  value={formData.paymentType}
+                  onValueChange={value => handleInputChange("paymentType", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o tipo de pagamento" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pagamento-fixo">Pagamento Fixo</SelectItem>
+                    <SelectItem value="pagamento-por-viagem">Pagamento por Viagem</SelectItem>
+                    <SelectItem value="outro">Outro</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Cadastrando..." : "Cadastrar Motorista"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   )
 }
