@@ -1,4 +1,4 @@
-import { DriverCards } from "@/components/DriversCardList";
+import { DriverDataGrid } from "@/components/DriversDataGrid";
 import { DriverRegistrationForm } from "@/components/FormRegisterDriver";
 
 export default function DrivePage () {
@@ -8,7 +8,7 @@ export default function DrivePage () {
         <DriverRegistrationForm />
       </div>
       <div>
-        <DriverCards />
+        <DriverDataGrid />
       </div>
     </div>
   )

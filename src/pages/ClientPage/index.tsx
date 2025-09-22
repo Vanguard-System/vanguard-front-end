@@ -1,4 +1,4 @@
-import { ClientCards } from "@/components/ClientCardList";
+import { ClientDataGrid } from "@/components/ClientDataGrid";
 import { FormClientRegister } from "@/components/FormClientRegister";
 
 export default function ClientPage() {
@@ -8,7 +8,7 @@ export default function ClientPage() {
         <FormClientRegister />
       </div>
       <div>
-        <ClientCards />
+        <ClientDataGrid />
       </div>
     </div>
   )

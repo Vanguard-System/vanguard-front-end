@@ -15,7 +15,7 @@ interface Client {
   email: string
 }
 
-export function ClientCards() {
+export function ClientDataGrid() {
   const { data: clients = [] } = useClient()
   const updateClientMutation = useUpdateClient()
   const deleteClientMutation = useDeleteClient()
