@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
+import { useCreateDriver } from "@/services/hooks/useDriver"
 
 interface DriverData {
   name: string
@@ -24,6 +25,7 @@ export function DriverRegistrationForm() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
+  const createDriverMutation = useCreateDriver()
 
   const formatCPF = (value: string) => {
     const numbers = value.replace(/\D/g, "")
@@ -62,9 +64,18 @@ export function DriverRegistrationForm() {
       return
     }
 
+    // Mapeando para o enum do backend
+    const paymentTypeMap: Record<string, string> = {
+      "Mensal": "Mensal",
+      "Por Viagem": "Por Viagem",
+    }
+
     setIsSubmitting(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await createDriverMutation.mutateAsync({
+        ...formData,
+        paymentType: paymentTypeMap[formData.paymentType],
+      })
       toast({ title: "Sucesso", description: "Motorista cadastrado com sucesso" })
       setFormData({ name: "", cpf: "", email: "", paymentType: "" })
     } catch {
@@ -124,9 +135,8 @@ export function DriverRegistrationForm() {
                     <SelectValue placeholder="Selecione o tipo de pagamento" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="pagamento-fixo">Pagamento Fixo</SelectItem>
-                    <SelectItem value="pagamento-por-viagem">Pagamento por Viagem</SelectItem>
-                    <SelectItem value="outro">Outro</SelectItem>
+                    <SelectItem value="Mensal">Mensal</SelectItem>
+                    <SelectItem value="Por Viagem">Por Viagem</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
