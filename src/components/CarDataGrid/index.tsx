@@ -12,6 +12,7 @@ interface Car {
   id: string
   model: string
   plate: string
+  consumption: number
 }
 
 export function CarDataGrid() {
@@ -90,6 +91,11 @@ export function CarDataGrid() {
                   <CreditCard className="h-4 w-4" /> Placa
                 </div>
               </TableHead>
+              <TableHead>
+                <div className="flex items-center gap-2">
+                  <CreditCard className="h-4 w-4" /> Consumo
+                </div>
+              </TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
@@ -110,6 +116,13 @@ export function CarDataGrid() {
                       <Input value={formData?.plate || ""} onChange={e => handleChange("plate", e.target.value)} className="h-8" />
                     ) : (
                       <span>{car.plate}</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {isEditing ? (
+                      <Input value={formData?.consumption || ""} onChange={e => handleChange("consumption", e.target.value)} className="h-8" />
+                    ) : (
+                      <span>{car.consumption}</span>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
@@ -180,6 +193,17 @@ export function CarDataGrid() {
                   <Input value={formData?.plate || ""} onChange={e => handleChange("plate", e.target.value)} className="h-9" />
                 ) : (
                   <p>{car.plate}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <CreditCard className="h-4 w-4" /> Consumo
+                </div>
+                {isEditing ? (
+                  <Input value={formData?.plate || 0} onChange={e => handleChange("consumption", e.target.value)} className="h-9" />
+                ) : (
+                  <p>{car.consumption}</p>
                 )}
               </div>
 

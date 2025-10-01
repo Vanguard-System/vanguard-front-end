@@ -11,12 +11,14 @@ import { useCreateCar } from "@/services/hooks/useCar"
 interface CarData {
   model: string
   plate: string
+  consumption: number
 }
 
 export function CarRegisterForm() {
   const [formData, setFormData] = useState<CarData>({
     model: "",
     plate: "",
+    consumption: 0
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
@@ -44,7 +46,7 @@ export function CarRegisterForm() {
     try {
       await createCarMutation.mutateAsync(formData)
       toast({ title: "Sucesso", description: "Carro cadastrado com sucesso" })
-      setFormData({ model: "", plate: "" })
+      setFormData({ model: "", plate: "", consumption: 0 })
     } catch {
       toast({ title: "Erro", description: "Falha ao cadastrar carro", variant: "destructive" })
     } finally {
@@ -60,7 +62,7 @@ export function CarRegisterForm() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-[2fr_2fr_1fr] gap-4 items-end">
               <div className="space-y-2">
                 <Label htmlFor="model">Modelo</Label>
                 <Input
@@ -71,6 +73,7 @@ export function CarRegisterForm() {
                   onChange={e => handleInputChange("model", e.target.value)}
                 />
               </div>
+
               <div className="space-y-2">
                 <Label htmlFor="plate">Placa</Label>
                 <Input
@@ -82,7 +85,20 @@ export function CarRegisterForm() {
                   maxLength={10}
                 />
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="consumption">Consumo</Label>
+                <Input
+                  id="consumption"
+                  type="text"
+                  placeholder="Digite o consumo do veículo"
+                  value={formData.consumption}
+                  onChange={e => handleInputChange("consumption", e.target.value)}
+                  maxLength={10}
+                />
+              </div>
             </div>
+
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? "Cadastrando..." : "Cadastrar Carro"}
             </Button>
