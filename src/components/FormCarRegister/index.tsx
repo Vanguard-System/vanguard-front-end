@@ -7,18 +7,22 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import { useCreateCar } from "@/services/hooks/useCar"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Info } from "lucide-react"
 
 interface CarData {
   model: string
   plate: string
   consumption: number
+  fixedCost:  number
 }
 
 export function CarRegisterForm() {
   const [formData, setFormData] = useState<CarData>({
     model: "",
     plate: "",
-    consumption: 0
+    consumption: 0,
+    fixedCost: 0,
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
@@ -46,7 +50,7 @@ export function CarRegisterForm() {
     try {
       await createCarMutation.mutateAsync(formData)
       toast({ title: "Sucesso", description: "Carro cadastrado com sucesso" })
-      setFormData({ model: "", plate: "", consumption: 0 })
+      setFormData({ model: "", plate: "", consumption: 0, fixedCost: 0 })
     } catch {
       toast({ title: "Erro", description: "Falha ao cadastrar carro", variant: "destructive" })
     } finally {
@@ -62,7 +66,8 @@ export function CarRegisterForm() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-[2fr_2fr_1fr] gap-4 items-end">
+            {/* Ajuste principal: grid de 2 colunas em telas médias ou maiores */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="model">Modelo</Label>
                 <Input
@@ -87,13 +92,50 @@ export function CarRegisterForm() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="consumption">Consumo</Label>
+                <div className="flex items-center gap-1">
+                  <Label htmlFor="consumption">Consumo</Label>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="w-4 h-4 text-gray-500 cursor-pointer" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Informe o consumo médio do veículo por km(ex: 2.5 ou 8).</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
                 <Input
                   id="consumption"
                   type="text"
                   placeholder="Digite o consumo do veículo"
                   value={formData.consumption}
                   onChange={e => handleInputChange("consumption", e.target.value)}
+                  maxLength={10}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center gap-1">
+                  <Label htmlFor="fixedCost">Preço fixo</Label>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="w-4 h-4 text-gray-500 cursor-pointer" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Digite o custo fixo mensal para manter o veículo
+                           (ex: seguro, documentação, internet, etc.).</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <Input
+                  id="fixedCost"
+                  type="text"
+                  placeholder="Digite o custo fixo do veículo"
+                  value={formData.fixedCost}
+                  onChange={e => handleInputChange("fixedCost", e.target.value)}
                   maxLength={10}
                 />
               </div>
