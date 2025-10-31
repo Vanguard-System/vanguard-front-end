@@ -8,13 +8,17 @@ import ClientPage from "@/pages/ClientPage";
 import SettingsPage from "@/pages/SettingsPage";
 import BudgetPage from "@/pages/BudgetPage";
 import PrivateRoute from "@/components/PrivateRoute";
+import ForgotPasswordForm from "@/components/ForgotPasswordForm";
+import ResetPasswordForm from "@/components/ResetPasswordForm";
 
 export default function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
-
+        <Route path="/forgot-password" element={<ForgotPasswordForm />} />
+        <Route path="/reset-password" element={<ResetPasswordForm />} />
+        
         <Route
           path="/"
           element={

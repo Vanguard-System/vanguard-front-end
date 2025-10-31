@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Eye, EyeOff, Mail, Lock, User } from "lucide-react"
 import { login } from "@/services/auth"
 import { CreateUser } from "@/services/users"
-import { Navigate, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 
 interface AuthFormData {
   email: string
@@ -51,50 +50,42 @@ export default function AuthForm() {
 
     if (!formData.password) {
       newErrors.password = "Senha é obrigatória"
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Senha deve ter pelo menos 6 caracteres"
-    }
+    } 
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
-    if (!validateForm()) return;
+    if (!validateForm()) return
 
-    setIsLoading(true);
+    setIsLoading(true)
 
     try {
       if (isLogin) {
-        const res = await login(formData.email, formData.password);
-        setApiResponse(res);
-        console.log("Login realizado:", res);
-        navigate("/Budget"); 
-      }
-
-      if (!isLogin) {
+        const res = await login(formData.email, formData.password)
+        setApiResponse(res)
+        console.log("Login realizado:", res)
+        navigate("/Budget")
+      } else {
         const res = await CreateUser({
           email: formData.email,
           username: formData.username!,
           password: formData.password,
-        });
-        setApiResponse(res);
-        console.log("Cadastro realizado:", res);
-
-        setIsLogin(true); 
-        navigate("/login"); 
+        })
+        setApiResponse(res)
+        console.log("Cadastro realizado:", res)
+        setIsLogin(true)
+        navigate("/login")
       }
-    } 
-    catch (error) {
-      console.error(`Erro no ${isLogin ? "login" : "cadastro"}:`, error);
-    } 
-    finally {
-      setIsLoading(false);
+    } catch (error) {
+      console.error(`Erro no ${isLogin ? "login" : "cadastro"}:`, error)
+    } finally {
+      setIsLoading(false)
     }
-  };
-
+  }
 
   const handleInputChange = (field: keyof AuthFormData, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -123,12 +114,15 @@ export default function AuthForm() {
           </div>
           <CardTitle className="text-2xl font-bold">{isLogin ? "Bem-vindo" : "Criar Conta"}</CardTitle>
           <CardDescription>
-            {isLogin ? "Entre com suas credenciais para acessar sua conta" : "Preencha os dados para criar sua conta"}
+            {isLogin
+              ? "Entre com suas credenciais para acessar sua conta"
+              : "Preencha os dados para criar sua conta"}
           </CardDescription>
         </CardHeader>
 
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
+            {/* Email */}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
@@ -145,6 +139,7 @@ export default function AuthForm() {
               {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
             </div>
 
+            {/* Username (somente no cadastro) */}
             {!isLogin && (
               <div className="space-y-2">
                 <Label htmlFor="username">Username</Label>
@@ -163,6 +158,7 @@ export default function AuthForm() {
               </div>
             )}
 
+            {/* Senha */}
             <div className="space-y-2">
               <Label htmlFor="password">Senha</Label>
               <div className="relative">
@@ -192,6 +188,7 @@ export default function AuthForm() {
               {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
             </div>
 
+            {/* Lembrar e Esqueceu senha */}
             {isLogin && (
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
@@ -208,7 +205,7 @@ export default function AuthForm() {
                   type="button"
                   variant="link"
                   className="px-0 text-sm"
-                  onClick={() => console.log('Redirecionar para esqueceu a senha')}
+                  onClick={() => navigate("/forgot-password")}
                 >
                   Esqueceu a senha?
                 </Button>
