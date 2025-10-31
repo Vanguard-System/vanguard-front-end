@@ -15,15 +15,12 @@ interface HoleriteSimplificadoProps {
     funcionario: string
     mes: string
     ano: string
-    viagens: { quantidade: number; valor: number }
-    alimentacao: number
-    extras: number
+    viagens: { quantidade: number; valor: number, totalDays: number, totalRemuneration: number }
   }
 }
 
 export default function RemunerationReceipt({ dados }: HoleriteSimplificadoProps) {
-  const totalViagens = dados.viagens.quantidade * dados.viagens.valor
-  const salarioFinal = totalViagens + dados.alimentacao + dados.extras
+  const total = dados.viagens.quantidade * dados.viagens.valor
 
   return (
     <Document>
@@ -54,37 +51,20 @@ export default function RemunerationReceipt({ dados }: HoleriteSimplificadoProps
             <Text>Valor por viagem:</Text>
             <Text>R$ {dados.viagens.valor.toFixed(2)}</Text>
           </View>
-          <View style={styles.row}>
-            <Text style={styles.bold}>Total Viagens:</Text>
-            <Text style={styles.bold}>R$ {totalViagens.toFixed(2)}</Text>
-          </View>
+        </View>
+
+
+        <View style={styles.divider} />
+
+        <View style={styles.row}>
+          <Text>Dias Totais Fora:</Text>
+          <Text>{dados.viagens.totalDays}</Text>
         </View>
 
         <View style={styles.divider} />
 
-        {/* Alimentação */}
-        <View style={styles.section}>
-          <Text style={styles.bold}>Alimentação</Text>
-          <View style={styles.row}>
-            <Text>Valor:</Text>
-            <Text>R$ {dados.alimentacao.toFixed(2)}</Text>
-          </View>
-        </View>
 
-        <View style={styles.divider} />
-
-        {/* Extras */}
-        <View style={styles.section}>
-          <Text style={styles.bold}>Extras</Text>
-          <View style={styles.row}>
-            <Text>Valor:</Text>
-            <Text>R$ {dados.extras.toFixed(2)}</Text>
-          </View>
-        </View>
-
-        <View style={styles.divider} />
-
-        <Text style={styles.total}>Salário Total: R$ {salarioFinal.toFixed(2)}</Text>
+        <Text style={styles.total}>Remuneração Total: R$ {dados.viagens.totalRemuneration.toFixed(2)}</Text>
       </Page>
     </Document>
   )

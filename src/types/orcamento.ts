@@ -1,13 +1,14 @@
 export interface Orcamento {
-  id: number
-  destino: string
+  id: string
   origem: string
-  data: string
-  hora: string
-  valor: string
-  motorista: string
-  carro: string
-  placa: string
-  cliente: string
+  destino: string
+  data_hora_viagem: string
+  date_hour_return_trip: string
+  cliente_id: string
+  driver_id: string
+  car_id: string
+  distancia_total: number
+  preco_viagem: number
+  lucro: number
   status: string
 }

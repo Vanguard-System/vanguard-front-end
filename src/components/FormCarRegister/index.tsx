@@ -14,7 +14,7 @@ interface CarData {
   model: string
   plate: string
   consumption: number
-  fixedCost:  number
+  fixed_cost:  number
 }
 
 export function CarRegisterForm() {
@@ -22,7 +22,7 @@ export function CarRegisterForm() {
     model: "",
     plate: "",
     consumption: 0,
-    fixedCost: 0,
+    fixed_cost: 0,
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
@@ -50,7 +50,7 @@ export function CarRegisterForm() {
     try {
       await createCarMutation.mutateAsync(formData)
       toast({ title: "Sucesso", description: "Carro cadastrado com sucesso" })
-      setFormData({ model: "", plate: "", consumption: 0, fixedCost: 0 })
+      setFormData({ model: "", plate: "", consumption: 0, fixed_cost: 0 })
     } catch {
       toast({ title: "Erro", description: "Falha ao cadastrar carro", variant: "destructive" })
     } finally {
@@ -134,8 +134,8 @@ export function CarRegisterForm() {
                   id="fixedCost"
                   type="text"
                   placeholder="Digite o custo fixo do veículo"
-                  value={formData.fixedCost}
-                  onChange={e => handleInputChange("fixedCost", e.target.value)}
+                  value={formData.fixed_cost}
+                  onChange={e => handleInputChange("fixed_cost", e.target.value)}
                   maxLength={10}
                 />
               </div>
