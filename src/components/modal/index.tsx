@@ -22,7 +22,7 @@ type BudgetModalProps = {
 
 export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
   const [selectedDrivers, setSelectedDrivers] = useState<string[]>([])
-  const [selectedCars, setSelectedCars] = useState<string[]>([])
+  const [selectedCar, setSelectedCar] = useState<string>("")
   const [selectedClient, setSelectedClient] = useState<string>("")
 
   const [origem, setOrigem] = useState("")
@@ -66,7 +66,7 @@ export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
   }, [selectedDrivers])
 
   const handleSubmit = () => {
-    if (!selectedClient || selectedDrivers.length === 0 || selectedCars.length === 0) {
+    if (!selectedClient || selectedDrivers.length === 0 || selectedCar.length === 0) {
       alert("Selecione motorista(s), carro(s) e cliente antes de salvar.")
       return
     }
@@ -82,7 +82,7 @@ export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
       numMotoristas,
       custoExtra,
       driver_id: selectedDrivers[0],
-      car_id: selectedCars[0],
+      car_id: selectedCar,
       cliente_id: selectedClient,
     }
 
@@ -93,7 +93,7 @@ export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
 
         // Limpa os campos
         setSelectedDrivers([])
-        setSelectedCars([])
+        setSelectedCar("")
         setSelectedClient("")
         setOrigem("")
         setDestino("")
@@ -168,45 +168,18 @@ export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
             </div>
 
             {/* Carros */}
-            <div className="grid gap-2 relative" ref={carsRef}>
-              <Label>Carros</Label>
-              <Button
-                variant="outline"
-                onClick={() => setCarsOpen(!carsOpen)}
-                className="text-left truncate max-w-full"
+            <div className="grid gap-2">
+              <Label>Carro</Label>
+              <select
+                className="border rounded-md p-2"
+                value={selectedCar}
+                onChange={(e) => setSelectedCar(e.target.value)}
               >
-                {selectedCars.length > 0
-                  ? cars
-                    ?.filter(c => selectedCars.includes(c.id))
-                    .map(c => `${c.model} (${c.plate})`)
-                    .join(", ")
-                  : "Selecione carros"}
-              </Button>
-              {carsOpen && (
-                <div className="absolute z-50 border rounded p-2 max-h-40 overflow-y-auto mt-1 w-full bg-white shadow-md">
-                  {isCarLoading ? (
-                    <p>Carregando...</p>
-                  ) : (
-                    cars?.map((car: any) => (
-                      <label key={car.id} className="flex items-center space-x-2 py-1">
-                        <input
-                          type="checkbox"
-                          checked={selectedCars.includes(car.id)}
-                          onChange={(e) => {
-                            const checked = e.target.checked
-                            setSelectedCars(prev =>
-                              checked
-                                ? [...prev, car.id]
-                                : prev.filter(id => id !== car.id)
-                            )
-                          }}
-                        />
-                        <span>{car.model} ({car.plate})</span>
-                      </label>
-                    ))
-                  )}
-                </div>
-              )}
+                <option value="">Selecione o carro</option>
+                {cars?.map((c: any) => (
+                  <option key={c.id} value={c.id}>{c.model}</option>
+                ))}
+              </select>
             </div>
           </div>
 

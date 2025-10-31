@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 import { useCreateDriver } from "@/services/hooks/useDriver"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip"
+import { Info } from "lucide-react"
 
 interface DriverData {
   name: string
@@ -120,6 +122,7 @@ export function DriverRegistrationForm() {
 
               {/* Linha de Email + driverCost + dailyPriceDriver */}
               <div className="flex gap-4 md:col-span-2">
+                {/* Email */}
                 <div className="flex-1 space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
@@ -130,8 +133,22 @@ export function DriverRegistrationForm() {
                     onChange={e => handleInputChange("email", e.target.value)}
                   />
                 </div>
-                <div className="flex-1 space-y-2">
-                  <Label htmlFor="driverCost">Custo por motorista</Label>
+
+                {/* Custo por motorista */}
+                <div className="flex-1 space-y-2 mt-2">
+                  <div className="flex items gap-1">
+                    <Label htmlFor="driverCost">Custo por motorista</Label>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="w-4 h-4 text-gray-500 cursor-pointer" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Informe o custo total mensal para manter o motorista.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                   <Input
                     id="driverCost"
                     type="number"
@@ -139,6 +156,8 @@ export function DriverRegistrationForm() {
                     onChange={e => handleInputChange("driverCost", e.target.value)}
                   />
                 </div>
+
+                {/* Diária do motorista */}
                 <div className="flex-1 space-y-2">
                   <Label htmlFor="dailyPriceDriver">Diária do motorista</Label>
                   <Input
@@ -149,6 +168,7 @@ export function DriverRegistrationForm() {
                   />
                 </div>
               </div>
+
             </div>
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>
