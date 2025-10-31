@@ -13,7 +13,7 @@ interface Car {
   model: string
   plate: string
   consumption: number
-  fixedCost: number
+  fixed_cost: number
 }
 
 export function CarDataGrid() {
@@ -133,9 +133,9 @@ export function CarDataGrid() {
                   </TableCell>
                   <TableCell>
                     {isEditing ? (
-                      <Input value={formData?.fixedCost || ""} onChange={e => handleChange("fixedCost", e.target.value)} className="h-8" />
+                      <Input value={formData?.fixed_cost || ""} onChange={e => handleChange("fixed_cost", e.target.value)} className="h-8" />
                     ) : (
-                        <span>{car.fixedCost}</span>
+                        <span>{car.fixed_cost}</span>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
@@ -225,7 +225,7 @@ export function CarDataGrid() {
                   <CreditCard className="h-4 w-4" /> Custo Fixo
                 </div>
                 {isEditing ? (
-                  <Input value={formData?.fixedCost || 0} onChange={e => handleChange("fixedCost", e.target.value)} className="h-9" />
+                  <Input value={formData?.fixed_cost || 0} onChange={e => handleChange("fixed_cost", e.target.value)} className="h-9" />
                 ) : (
                   <p>{car.consumption}</p>
                 )}

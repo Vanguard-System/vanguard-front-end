@@ -13,7 +13,8 @@ interface DriverData {
   name: string
   cpf: string
   email: string
-  paymentType: string
+  driverCost: number,
+  dailyPriceDriver: number
 }
 
 export function DriverRegistrationForm() {
@@ -21,7 +22,8 @@ export function DriverRegistrationForm() {
     name: "",
     cpf: "",
     email: "",
-    paymentType: "",
+    driverCost: 0,
+    dailyPriceDriver: 0,
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
@@ -59,25 +61,22 @@ export function DriverRegistrationForm() {
       toast({ title: "Erro", description: "Email inválido", variant: "destructive" })
       return
     }
-    if (!formData.paymentType) {
-      toast({ title: "Erro", description: "Tipo de pagamento obrigatório", variant: "destructive" })
+    if (!formData.driverCost) {
+      toast({ title: "Erro", description: "Custo do motorista obrigatório", variant: "destructive" })
       return
     }
-
-    // Mapeando para o enum do backend
-    const paymentTypeMap: Record<string, string> = {
-      "Mensal": "Mensal",
-      "Por Viagem": "Por Viagem",
+    if (!formData.dailyPriceDriver) {
+      toast({ title: "Erro", description: "Custo por diária do motorista obrigatório", variant: "destructive" })
+      return
     }
 
     setIsSubmitting(true)
     try {
       await createDriverMutation.mutateAsync({
         ...formData,
-        paymentType: paymentTypeMap[formData.paymentType],
       })
       toast({ title: "Sucesso", description: "Motorista cadastrado com sucesso" })
-      setFormData({ name: "", cpf: "", email: "", paymentType: "" })
+      setFormData({ name: "", cpf: "", email: "", driverCost: 0, dailyPriceDriver: 0 })
     } catch {
       toast({ title: "Erro", description: "Falha ao cadastrar motorista", variant: "destructive" })
     } finally {
@@ -94,6 +93,7 @@ export function DriverRegistrationForm() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Nome */}
               <div className="space-y-2">
                 <Label htmlFor="name">Nome Completo</Label>
                 <Input
@@ -104,6 +104,8 @@ export function DriverRegistrationForm() {
                   onChange={e => handleInputChange("name", e.target.value)}
                 />
               </div>
+
+              {/* CPF */}
               <div className="space-y-2">
                 <Label htmlFor="cpf">CPF</Label>
                 <Input
@@ -115,32 +117,40 @@ export function DriverRegistrationForm() {
                   maxLength={14}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="exemplo@email.com"
-                  value={formData.email}
-                  onChange={e => handleInputChange("email", e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="paymentType">Tipo de Pagamento</Label>
-                <Select
-                  value={formData.paymentType}
-                  onValueChange={value => handleInputChange("paymentType", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o tipo de pagamento" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Mensal">Mensal</SelectItem>
-                    <SelectItem value="Por Viagem">Por Viagem</SelectItem>
-                  </SelectContent>
-                </Select>
+
+              {/* Linha de Email + driverCost + dailyPriceDriver */}
+              <div className="flex gap-4 md:col-span-2">
+                <div className="flex-1 space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="exemplo@email.com"
+                    value={formData.email}
+                    onChange={e => handleInputChange("email", e.target.value)}
+                  />
+                </div>
+                <div className="flex-1 space-y-2">
+                  <Label htmlFor="driverCost">Custo por motorista</Label>
+                  <Input
+                    id="driverCost"
+                    type="number"
+                    value={formData.driverCost}
+                    onChange={e => handleInputChange("driverCost", e.target.value)}
+                  />
+                </div>
+                <div className="flex-1 space-y-2">
+                  <Label htmlFor="dailyPriceDriver">Diária do motorista</Label>
+                  <Input
+                    id="dailyPriceDriver"
+                    type="number"
+                    value={formData.dailyPriceDriver}
+                    onChange={e => handleInputChange("dailyPriceDriver", e.target.value)}
+                  />
+                </div>
               </div>
             </div>
+
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? "Cadastrando..." : "Cadastrar Motorista"}
             </Button>

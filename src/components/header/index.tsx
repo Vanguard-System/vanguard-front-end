@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Settings, User, LogOut, Search, Menu, X, Home, Bus, Users } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { logout } from "@/services/auth"
+import { useCurrentUser } from "@/services/hooks/useUsers" // <--- hook novo
 
 const menuItems = [
   { title: "Home", icon: Home, url: "/Home" },
@@ -22,8 +23,10 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
   const navigate = useNavigate();
 
+  const { data: currentUser, isLoading } = useCurrentUser() // pega o usuário logado
+
   const handleLogout = async () => {
-    await logout(); 
+    await logout();
     navigate('/login');
   };
 
@@ -72,7 +75,9 @@ export default function Header() {
                 <User className="w-4 h-4 text-gray-600" />
               </div>
               <div className="text-sm">
-                <p className="font-medium text-gray-900">João Silva</p>
+                <p className="font-medium text-gray-900">
+                  {isLoading ? "Carregando..." : currentUser?.username || "Usuário"}
+                </p>
                 <p className="text-gray-500">Administrador</p>
               </div>
             </div>
@@ -100,7 +105,7 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Menu Mobile - agora contém o sidebar completo */}
+      {/* Menu Mobile */}
       {menuOpen && (
         <div className="sm:hidden bg-white border-t border-gray-200 shadow-md px-4 py-3">
           {/* Busca Mobile */}
