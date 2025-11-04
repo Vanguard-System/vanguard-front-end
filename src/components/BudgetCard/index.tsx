@@ -107,7 +107,7 @@ export default function BudgetCard({
   }
 
   const gerarLinkWhatsApp = (orcamento: any) => {
-    const mensagem = `Olá ${orcamento.cliente}, aqui está seu orçamento:
+    const mensagem = `Olá ${findName(clients || [], orcamento.cliente, "Cliente")}, aqui está seu orçamento:
 Origem: ${orcamento.origem}
 Destino: ${orcamento.destino}
 Carro: ${orcamento.carro}
@@ -115,9 +115,12 @@ Motorista: ${orcamento.motorista}
 Data/Hora: ${orcamento.data_hora_viagem}
 Preço: R$ ${orcamento.preco_viagem}`
 
-    const numero = ""
+    const clienteObj = clients?.find((c: any) => String(c.id) === orcamento.cliente)
+    const numero = clienteObj?.phone || "55DDNNNNNNNN" 
+
     return `https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`
   }
+
 
   const findName = (list: any[], id: string, fallback: string) => {
     return list?.find((item) => String(item.id) === id)?.name || fallback

@@ -10,7 +10,6 @@ import BudgetCard from "@/components/BudgetCard"
 export default function BudgetPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  // Hooks do backend
   const { data: orcamentos = [], isLoading } = useBudget()
   const updateBudget = useUpdateBudget()
   const deleteBudget = useDeleteBudget()
@@ -56,7 +55,7 @@ export default function BudgetPage() {
           </CardHeader>
           <CardContent>
             <div className="text-xl sm:text-2xl font-bold text-green-600">
-              {orcamentos.filter((v) => v.status === "Aprovada").length}
+              {orcamentos.filter((v: any) => v.status === "Aprovada").length}
             </div>
           </CardContent>
         </Card>
@@ -67,7 +66,7 @@ export default function BudgetPage() {
           </CardHeader>
           <CardContent>
             <div className="text-xl sm:text-2xl font-bold text-yellow-600">
-              {orcamentos.filter((v) => v.status === "Pendente").length}
+              {orcamentos.filter((v: any) => v.status === "Pendente").length}
             </div>
           </CardContent>
         </Card>
@@ -78,7 +77,7 @@ export default function BudgetPage() {
           </CardHeader>
           <CardContent>
             <div className="text-xl sm:text-2xl font-bold text-red-600">
-              {orcamentos.filter((v) => v.status === "Cancelada").length}
+              {orcamentos.filter((v: any) => v.status === "Cancelada").length}
             </div>
           </CardContent>
         </Card>

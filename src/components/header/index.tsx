@@ -42,13 +42,13 @@ export default function Header() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <div className="w-14 h-10 bg-gradient-to-r rounded-lg flex items-center justify-center">
-              <img src="src/assets/logo.png" alt="Descrição da imagem" />
+            <div className="w-60 h-48 bg-gradient-to-r rounded-lg flex items-center justify-center">
+              <img src="src/assets/title.jpeg" alt="Descrição da imagem" />
             </div>
           </div>
 
           {/* Busca Desktop */}
-          <div className="flex-1 mx-4 hidden sm:block">
+          {/* <div className="flex-1 mx-4 hidden sm:block">
             <form onSubmit={handleSearch} className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
@@ -59,7 +59,7 @@ export default function Header() {
                 className="pl-10 pr-4 py-2 w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </form>
-          </div>
+          </div> */}
 
           {/* Hamburger Mobile */}
           <div className="sm:hidden flex items-center">
