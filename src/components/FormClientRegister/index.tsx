@@ -51,7 +51,6 @@ export function FormClientRegister() {
       toast({ title: "Sucesso", description: "Cliente cadastrado com sucesso" })
       setFormData({ name: "", email: "", telephone: "" })
     } catch (error: any) {
-      console.error(error)
       toast({ title: "Erro", description: "Falha ao cadastrar cliente", variant: "destructive" })
     } finally {
       setIsSubmitting(false)

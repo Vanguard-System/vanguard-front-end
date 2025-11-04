@@ -135,8 +135,8 @@ export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
               >
                 {selectedDrivers.length > 0
                   ? drivers
-                    ?.filter(d => selectedDrivers.includes(d.id))
-                    .map(d => d.name)
+                    ?.filter((d: any) => selectedDrivers.includes(d.id))
+                    .map((d: any) => d.name)
                     .join(", ")
                   : "Selecione motoristas"}
               </Button>

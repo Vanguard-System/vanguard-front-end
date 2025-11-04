@@ -30,7 +30,7 @@
     },
 
     /* Tipos do Node para o Vite */
-    "types": ["node"]
+  "types": ["node", "jest", "@testing-library/jest-dom"]
   },
   "include": ["src"]
 }
