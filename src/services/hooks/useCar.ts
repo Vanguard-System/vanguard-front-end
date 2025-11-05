@@ -12,7 +12,7 @@ export function useCreateCar() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: { model: string; plate: string }) => createCar(data),
+    mutationFn: (data: { model: string; plate: string, consumption: number, fixed_cost: number }) => createCar(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["car"] }); 
     },
@@ -23,7 +23,7 @@ export function useUpdateCar() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: { model?: string; plate?: string } }) =>
+    mutationFn: ({ id, data }: { id: string; data: { model?: string; plate?: string, consumption: number, fixed_cost: number } }) =>
       updateCar(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["car"] });

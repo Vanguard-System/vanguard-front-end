@@ -1,12 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useToast } from "@/hooks/use-toast"
 import { useCreateClient } from "@/services/hooks/useClient"
+import BackendAlert from "@/components/BackendAlert"
 
 interface ClientData {
   name: string
@@ -21,7 +21,7 @@ export function FormClientRegister() {
     telephone: "",
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { toast } = useToast()
+  const [alert, setAlert] = useState<{ status: 'success' | 'error'; message: string } | null>(null)
   const createClientMutation = useCreateClient()
 
   const validateEmail = (email: string) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)
@@ -32,30 +32,38 @@ export function FormClientRegister() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
     if (!formData.name.trim()) {
-      toast({ title: "Erro", description: "Nome é obrigatório", variant: "destructive" })
+      setAlert({ status: "error", message: "Nome é obrigatório" })
       return
     }
     if (!formData.telephone.trim()) {
-      toast({ title: "Erro", description: "Telefone é obrigatório", variant: "destructive" })
+      setAlert({ status: "error", message: "Telefone é obrigatório" })
       return
     }
     if (!validateEmail(formData.email)) {
-      toast({ title: "Erro", description: "Email inválido", variant: "destructive" })
+      setAlert({ status: "error", message: "Email inválido" })
       return
     }
 
     setIsSubmitting(true)
     try {
       await createClientMutation.mutateAsync(formData)
-      toast({ title: "Sucesso", description: "Cliente cadastrado com sucesso" })
+      setAlert({ status: "success", message: "Cliente cadastrado com sucesso" })
       setFormData({ name: "", email: "", telephone: "" })
-    } catch (error: any) {
-      toast({ title: "Erro", description: "Falha ao cadastrar cliente", variant: "destructive" })
+    } catch {
+      setAlert({ status: "error", message: "Falha ao cadastrar cliente" })
     } finally {
       setIsSubmitting(false)
     }
   }
+
+  // Remove alerta após 4 segundos
+  useEffect(() => {
+    if (!alert) return
+    const timer = setTimeout(() => setAlert(null), 4000)
+    return () => clearTimeout(timer)
+  }, [alert])
 
   return (
     <div className="flex flex-1 p-4 md:p-6 ml-0 mt-20 md:ml-64">
@@ -103,6 +111,13 @@ export function FormClientRegister() {
           </form>
         </CardContent>
       </Card>
+
+      {/* Alerta Backend */}
+      {alert && (
+        <div className="fixed bottom-5 right-5 sm:right-8 w-72 sm:w-96 z-50">
+          <BackendAlert status={alert.status} message={alert.message} />
+        </div>
+      )}
     </div>
   )
 }

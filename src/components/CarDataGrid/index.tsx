@@ -1,12 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { User, CreditCard, Edit, Trash2, Check, X, ChevronLeft, ChevronRight } from "lucide-react"
 import { Input } from "@/components/ui/input"
-import { useToast } from "@/hooks/use-toast"
 import { useCar, useUpdateCar, useDeleteCar } from "@/services/hooks/useCar"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import BackendAlert from "@/components/BackendAlert"
+import { Dialog, DialogContent, DialogOverlay, DialogPortal, DialogTitle } from "@radix-ui/react-dialog"
+import { DialogFooter, DialogHeader } from "../ui/dialog"
 
 interface Car {
   id: string
@@ -20,10 +22,19 @@ export function CarDataGrid() {
   const { data: cars = [] } = useCar()
   const updateCarMutation = useUpdateCar()
   const deleteCarMutation = useDeleteCar()
-  const { toast } = useToast()
 
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState<Car | null>(null)
+  const [alert, setAlert] = useState<{ status: 'success' | 'error'; message: string } | null>(null)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [carToDelete, setCarToDelete] = useState<Car | null>(null)
+
+
+  useEffect(() => {
+    if (!alert) return
+    const timer = setTimeout(() => setAlert(null), 4000)
+    return () => clearTimeout(timer)
+  }, [alert])
 
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 5
@@ -47,24 +58,46 @@ export function CarDataGrid() {
     if (!formData) return
     try {
       await updateCarMutation.mutateAsync({ id: formData.id, data: formData })
-      toast({ title: "Sucesso", description: "Carro atualizado com sucesso" })
+      setAlert({ status: "success", message: "Carro atualizado com sucesso" })
       cancelEdit()
     } catch {
-      toast({ title: "Erro", description: "Falha ao atualizar carro", variant: "destructive" })
+      setAlert({ status: "error", message: "Falha ao atualizar carro" })
     }
   }
 
   const handleChange = (field: keyof Car, value: string) => {
     if (!formData) return
-    setFormData(prev => (prev ? { ...prev, [field]: value } : null))
+    if (field === "fixed_cost" || field === "consumption") {
+      setFormData(prev => (prev ? { ...prev, [field]: Number(value) } : null))
+    } else {
+      setFormData(prev => (prev ? { ...prev, [field]: value } : null))
+    }
   }
 
-  const handleDelete = async (id: string) => {
+  const handleDeleteClick = (car: Car) => {
+    setCarToDelete(car)
+    setDeleteConfirmOpen(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!carToDelete) return
     try {
-      await deleteCarMutation.mutateAsync(id)
-      toast({ title: "Sucesso", description: "Carro deletado com sucesso" })
-    } catch {
-      toast({ title: "Erro", description: "Falha ao deletar carro", variant: "destructive" })
+      await deleteCarMutation.mutateAsync(carToDelete.id)
+      setAlert({ status: "success", message: "Carro deletado com sucesso" })
+    } catch (error: any) {
+      if (error.response?.data?.message?.includes("foreign key")) {
+        setAlert({
+          status: "error",
+          message: "Não é possível deletar este carro porque ele está vinculado a um orçamento.",
+        })
+      }
+      else {
+        setAlert({ status: "error", message: "Falha ao deletar carro" })
+      }
+    }
+    finally {
+      setDeleteConfirmOpen(false)
+      setCarToDelete(null)
     }
   }
 
@@ -106,7 +139,7 @@ export function CarDataGrid() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paginatedCars.map((car: Car) => {
+            {paginatedCars.map((car : any) => {
               const isEditing = editingId === car.id
               return (
                 <TableRow key={car.id} className="hover:bg-muted/50">
@@ -126,16 +159,16 @@ export function CarDataGrid() {
                   </TableCell>
                   <TableCell>
                     {isEditing ? (
-                      <Input value={formData?.consumption || ""} onChange={e => handleChange("consumption", e.target.value)} className="h-8" />
+                      <Input value={formData?.consumption ?? 0} onChange={e => handleChange("consumption", e.target.value)} className="h-8" />
                     ) : (
                       <span>{car.consumption}</span>
                     )}
                   </TableCell>
                   <TableCell>
                     {isEditing ? (
-                      <Input value={formData?.fixed_cost || ""} onChange={e => handleChange("fixed_cost", e.target.value)} className="h-8" />
+                      <Input value={formData?.fixed_cost ?? 0} onChange={e => handleChange("fixed_cost", e.target.value)} className="h-8" />
                     ) : (
-                        <span>{car.fixed_cost}</span>
+                      <span>{car.fixed_cost}</span>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
@@ -154,7 +187,7 @@ export function CarDataGrid() {
                           <Button variant="ghost" size="sm" onClick={() => startEdit(car)} className="h-8 px-3 hover:bg-blue-50 hover:text-blue-600">
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleDelete(car.id)} className="h-8 px-3 hover:bg-red-50 hover:text-red-600">
+                          <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(car)} className="h-8 px-3 hover:bg-red-50 hover:text-red-600">
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </>
@@ -168,26 +201,13 @@ export function CarDataGrid() {
         </Table>
       </div>
 
-      {/* Paginação Desktop */}
-      {totalPages > 1 && (
-        <div className="hidden md:flex justify-end items-center gap-2 mt-4">
-          <Button variant="ghost" size="sm" onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span>Página {currentPage} de {totalPages}</span>
-          <Button variant="ghost" size="sm" onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages}>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
-
       {/* Cards Mobile */}
-      <div className="md:hidden flex flex-col gap-4 overflow-auto">
-        {paginatedCars.map((car: Car) => {
+      <div className="md:hidden flex flex-col gap-4">
+        {paginatedCars.map((car: any) => {
           const isEditing = editingId === car.id
           return (
             <div key={car.id} className="bg-card border rounded-lg p-4 space-y-3">
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                   <User className="h-4 w-4" /> Modelo
                 </div>
@@ -198,7 +218,7 @@ export function CarDataGrid() {
                 )}
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                   <CreditCard className="h-4 w-4" /> Placa
                 </div>
@@ -209,25 +229,25 @@ export function CarDataGrid() {
                 )}
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                   <CreditCard className="h-4 w-4" /> Consumo
                 </div>
                 {isEditing ? (
-                  <Input value={formData?.plate || 0} onChange={e => handleChange("consumption", e.target.value)} className="h-9" />
+                  <Input value={formData?.consumption ?? 0} onChange={e => handleChange("consumption", e.target.value)} className="h-9" />
                 ) : (
                   <p>{car.consumption}</p>
                 )}
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                   <CreditCard className="h-4 w-4" /> Custo Fixo
                 </div>
                 {isEditing ? (
-                  <Input value={formData?.fixed_cost || 0} onChange={e => handleChange("fixed_cost", e.target.value)} className="h-9" />
+                  <Input value={formData?.fixed_cost ?? 0} onChange={e => handleChange("fixed_cost", e.target.value)} className="h-9" />
                 ) : (
-                  <p>{car.consumption}</p>
+                  <p>{car.fixed_cost}</p>
                 )}
               </div>
 
@@ -246,7 +266,7 @@ export function CarDataGrid() {
                     <Button variant="ghost" size="sm" onClick={() => startEdit(car)} className="h-9 px-4 hover:bg-blue-50 hover:text-blue-600">
                       <Edit className="h-4 w-4 mr-2" /> Editar
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleDelete(car.id)} className="h-9 px-4 hover:bg-red-50 hover:text-red-600">
+                    <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(car)} className="h-9 px-4 hover:bg-red-50 hover:text-red-600">
                       <Trash2 className="h-4 w-4 mr-2" /> Excluir
                     </Button>
                   </>
@@ -269,6 +289,47 @@ export function CarDataGrid() {
           </div>
         )}
       </div>
+
+
+      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <DialogPortal>
+          <DialogOverlay className="fixed inset-0 bg-black/50 z-[999]" />
+          <div className="fixed inset-0 flex items-center justify-center z-[1000] px-4">
+            <DialogContent className="w-full max-w-sm bg-white rounded-2xl shadow-lg p-6 relative">
+              <DialogHeader>
+                <DialogTitle>Confirmar exclusão</DialogTitle>
+              </DialogHeader>
+              <p className="text-sm text-gray-600 mt-2">
+                Tem certeza que deseja excluir o carro{" "}
+                <strong>{carToDelete?.model}</strong>?
+              </p>
+              <DialogFooter className="flex justify-end gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setDeleteConfirmOpen(false)}
+                  className="w-24"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={confirmDelete}
+                  className="w-24"
+                >
+                  Excluir
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </div>
+        </DialogPortal>
+      </Dialog>
+
+      {/* Alerta Backend */}
+      {alert && (
+        <div className="fixed bottom-5 right-5 sm:right-8 w-72 sm:w-96 z-50">
+          <BackendAlert status={alert.status} message={alert.message} />
+        </div>
+      )}
 
       {cars.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">Nenhum carro cadastrado</div>

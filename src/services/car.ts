@@ -5,12 +5,12 @@ export async function getCar() {
   return data;
 }
 
-export async function createCar(carData: { model: string; plate: string; }) {
+export async function createCar(carData: { model: string; plate: string; consumption: number; fixed_cost: number }) {
   const { data } = await api.post("/car", carData);
   return data;
 }
 
-export async function updateCar(id: string, carData: { model?: string; plate?: string; }) {
+export async function updateCar(id: string, carData: { model?: string; plate?: string; consumption: number; fixed_cost: number }) {
   const { data } = await api.put(`/car/${id}`, carData);
   return data;
 }

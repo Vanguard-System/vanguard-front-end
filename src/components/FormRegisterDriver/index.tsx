@@ -1,21 +1,20 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useToast } from "@/hooks/use-toast"
-import { useCreateDriver } from "@/services/hooks/useDriver"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip"
 import { Info } from "lucide-react"
+import { useCreateDriver } from "@/services/hooks/useDriver"
+import BackendAlert from "@/components/BackendAlert"
 
 interface DriverData {
   name: string
   cpf: string
   email: string
-  driverCost: number,
+  driverCost: number
   dailyPriceDriver: number
 }
 
@@ -28,7 +27,7 @@ export function DriverRegistrationForm() {
     dailyPriceDriver: 0,
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { toast } = useToast()
+  const [alert, setAlert] = useState<{ status: 'success' | 'error'; message: string } | null>(null)
   const createDriverMutation = useCreateDriver()
 
   const formatCPF = (value: string) => {
@@ -52,39 +51,44 @@ export function DriverRegistrationForm() {
     e.preventDefault()
 
     if (!formData.name.trim()) {
-      toast({ title: "Erro", description: "Nome é obrigatório", variant: "destructive" })
+      setAlert({ status: "error", message: "Nome é obrigatório" })
       return
     }
     if (!validateCPF(formData.cpf)) {
-      toast({ title: "Erro", description: "CPF inválido", variant: "destructive" })
+      setAlert({ status: "error", message: "CPF inválido" })
       return
     }
     if (!validateEmail(formData.email)) {
-      toast({ title: "Erro", description: "Email inválido", variant: "destructive" })
+      setAlert({ status: "error", message: "Email inválido" })
       return
     }
     if (!formData.driverCost) {
-      toast({ title: "Erro", description: "Custo do motorista obrigatório", variant: "destructive" })
+      setAlert({ status: "error", message: "Custo do motorista obrigatório" })
       return
     }
     if (!formData.dailyPriceDriver) {
-      toast({ title: "Erro", description: "Custo por diária do motorista obrigatório", variant: "destructive" })
+      setAlert({ status: "error", message: "Custo por diária do motorista obrigatório" })
       return
     }
 
     setIsSubmitting(true)
     try {
-      await createDriverMutation.mutateAsync({
-        ...formData,
-      })
-      toast({ title: "Sucesso", description: "Motorista cadastrado com sucesso" })
+      await createDriverMutation.mutateAsync(formData)
+      setAlert({ status: "success", message: "Motorista cadastrado com sucesso" })
       setFormData({ name: "", cpf: "", email: "", driverCost: 0, dailyPriceDriver: 0 })
     } catch {
-      toast({ title: "Erro", description: "Falha ao cadastrar motorista", variant: "destructive" })
+      setAlert({ status: "error", message: "Falha ao cadastrar motorista" })
     } finally {
       setIsSubmitting(false)
     }
   }
+
+  // Remove alerta após 4 segundos
+  useEffect(() => {
+    if (!alert) return
+    const timer = setTimeout(() => setAlert(null), 4000)
+    return () => clearTimeout(timer)
+  }, [alert])
 
   return (
     <div className="flex flex-1 p-4 md:p-6 ml-0 mt-20 md:ml-64">
@@ -122,7 +126,6 @@ export function DriverRegistrationForm() {
 
               {/* Linha de Email + driverCost + dailyPriceDriver */}
               <div className="flex gap-4 md:col-span-2">
-                {/* Email */}
                 <div className="flex-1 space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
@@ -134,7 +137,6 @@ export function DriverRegistrationForm() {
                   />
                 </div>
 
-                {/* Custo por motorista */}
                 <div className="flex-1 space-y-2 mt-2">
                   <div className="flex items gap-1">
                     <Label htmlFor="driverCost">Custo por motorista</Label>
@@ -157,7 +159,6 @@ export function DriverRegistrationForm() {
                   />
                 </div>
 
-                {/* Diária do motorista */}
                 <div className="flex-1 space-y-2">
                   <Label htmlFor="dailyPriceDriver">Diária do motorista</Label>
                   <Input
@@ -168,7 +169,6 @@ export function DriverRegistrationForm() {
                   />
                 </div>
               </div>
-
             </div>
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>
@@ -177,6 +177,13 @@ export function DriverRegistrationForm() {
           </form>
         </CardContent>
       </Card>
+
+      {/* Alerta Backend */}
+      {alert && (
+        <div className="fixed bottom-5 right-5 sm:right-8 w-72 sm:w-96 z-50">
+          <BackendAlert status={alert.status} message={alert.message} />
+        </div>
+      )}
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import {
@@ -24,6 +24,9 @@ import { useDriver } from "@/services/hooks/useDriver"
 import { useClient } from "@/services/hooks/useClient"
 import { useQueryClient } from "@tanstack/react-query"
 import { useUpdateBudgetStatus } from "@/services/hooks/useBudget"
+import BackendAlert from "../BackendAlert"
+import { Dialog, DialogContent, DialogOverlay, DialogPortal, DialogTitle } from "@radix-ui/react-dialog"
+import { DialogFooter, DialogHeader } from "../ui/dialog"
 
 interface BudgetCardProps {
   orcamento: Orcamento
@@ -53,29 +56,39 @@ export default function BudgetCard({
 
   const [isEditing, setIsEditing] = useState(false)
   const [isEditingStatus, setIsEditingStatus] = useState(false)
+  const [alert, setAlert] = useState<{ status: "success" | "error"; message: string } | null>(null)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [budgetToDelete, setBudgetToDelete] = useState<Orcamento | null>(null)
+
   const [formData, setFormData] = useState({
     id: orcamento.id,
     origem: orcamento.origem,
     destino: orcamento.destino,
     carro: String(orcamento.car_id || ""),
-    motorista: String(orcamento.driver_id || ""),
+    motoristas: orcamento.driver_id || [], 
     cliente: String(orcamento.cliente_id || ""),
     data_hora_viagem: formatForInput(orcamento.data_hora_viagem),
     date_hour_return_trip: formatForInput(orcamento.date_hour_return_trip),
     preco_viagem: orcamento.preco_viagem,
-    lucro: orcamento.lucro,
-    status: orcamento.status, // pega diretamente do backend
+    lucroDesejado: orcamento.lucroDesejado,
+    status: orcamento.status,
     distancia_total: orcamento.distancia_total,
   })
 
-  const handleChange = (field: keyof typeof formData, value: string) => {
+  useEffect(() => {
+    if (!alert) return;
+    const timer = setTimeout(() => setAlert(null), 4000)
+    return () => clearTimeout(timer)
+  }, [alert])
+
+  const handleChange = (field: keyof typeof formData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
   const handleSave = async () => {
     try {
-      if (!formData.carro || !formData.motorista || !formData.cliente) {
-        alert("Selecione carro, motorista e cliente antes de salvar.")
+      if (!formData.carro || !formData.motoristas.length || !formData.cliente) {
+        setAlert({ status: "error", message: "Selecione carro, motorista(s) e cliente antes de salvar." })
         return
       }
 
@@ -83,40 +96,76 @@ export default function BudgetCard({
         origem: formData.origem,
         destino: formData.destino,
         car_id: formData.carro,
-        driver_id: formData.motorista,
+        driver_ids: formData.motoristas,
         cliente_id: formData.cliente,
         data_hora_viagem: formData.data_hora_viagem,
         date_hour_return_trip: formData.date_hour_return_trip,
-        status: formData.status, // envia exatamente como está
+        lucroDesejado: formData.lucroDesejado,
+        preco_viagem: formData.preco_viagem,
+        status: formData.status,
       }
 
       await updateBudget.mutateAsync({ id: formData.id, data: payload })
       await queryClient.invalidateQueries({ queryKey: ["budget"] })
       setIsEditing(false)
       setIsEditingStatus(false)
-    } catch (err) {
+      setAlert({ status: "success", message: "Orçamento atualizado com sucesso!" })
+    } catch (err: any) {
       console.error("Erro ao salvar orçamento:", err)
-      alert("Erro ao salvar o orçamento. Veja o console para mais detalhes.")
+      setAlert({ status: "error", message: err?.response?.data?.message || "Erro ao salvar o orçamento." })
     }
   }
 
-  const handleDelete = () => {
-    if (confirm("Deseja realmente deletar este orçamento?")) {
-      deleteBudget.mutate(orcamento.id)
+  useEffect(() => {
+    if (!isEditing) {
+      setFormData({
+        id: orcamento.id,
+        origem: orcamento.origem,
+        destino: orcamento.destino,
+        carro: String(orcamento.car_id || ""),
+        motoristas: orcamento.driver_id || [],
+        cliente: String(orcamento.cliente_id || ""),
+        data_hora_viagem: formatForInput(orcamento.data_hora_viagem),
+        date_hour_return_trip: formatForInput(orcamento.date_hour_return_trip),
+        preco_viagem: Number(orcamento.preco_viagem) || 0,
+        lucroDesejado: Number(orcamento.lucroDesejado) || 0,
+        status: orcamento.status,
+        distancia_total: orcamento.distancia_total || 0,
+      })
+    }
+  }, [orcamento, isEditing])
+
+
+  const handleDeleteClick = (budget: Orcamento) => {
+    setBudgetToDelete(budget)
+    setDeleteConfirmOpen(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!budgetToDelete) return
+    try {
+      await deleteBudget.mutateAsync(budgetToDelete.id)
+      setDeleteConfirmOpen(false)
+      setAlert({ status: "success", message: "Orçamento deletado com sucesso" })
+    } catch {
+      setDeleteConfirmOpen(false)
+      setAlert({ status: "error", message: "Falha ao deletar orçamento" })
+    } finally {
+      setBudgetToDelete(null)
     }
   }
 
-  const gerarLinkWhatsApp = (orcamento: any) => {
-    const mensagem = `Olá ${findName(clients || [], orcamento.cliente, "Cliente")}, aqui está seu orçamento:
-Origem: ${orcamento.origem}
-Destino: ${orcamento.destino}
-Carro: ${orcamento.carro}
-Motorista: ${orcamento.motorista}
-Data/Hora: ${orcamento.data_hora_viagem}
-Preço: R$ ${orcamento.preco_viagem}`
+  const gerarLinkWhatsApp = (orcamento: Orcamento) => {
+    const mensagem = `Olá ${findName(clients || [], orcamento.cliente_id, "Cliente")}, aqui está seu orçamento:
+    Origem: ${orcamento.origem}
+    Destino: ${orcamento.destino}
+    Carro: ${orcamento.car_id}
+    Motorista(s): ${orcamento.driver_id.map((id: string) => findName(drivers || [], id, id)).join(", ")}
+    Data/Hora: ${new Date(orcamento.data_hora_viagem).toLocaleString("pt-BR")}
+    Preço: R$ ${orcamento.preco_viagem.toFixed(2)}`
 
-    const clienteObj = clients?.find((c: any) => String(c.id) === orcamento.cliente)
-    const numero = clienteObj?.phone || "55DDNNNNNNNN" 
+    const clienteObj = clients?.find((c: any) => String(c.id) === orcamento.cliente_id)
+    const numero = clienteObj?.telephone || "55DDNNNNNNNN"
 
     return `https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`
   }
@@ -133,7 +182,7 @@ Preço: R$ ${orcamento.preco_viagem}`
 
   return (
     <Card className="hover:shadow-md transition-shadow relative">
-      {/* Label de Status */}
+      {/* Status */}
       <div className="absolute top-3 right-3">
         {isEditingStatus ? (
           <select
@@ -141,18 +190,12 @@ Preço: R$ ${orcamento.preco_viagem}`
             onChange={async (e) => {
               const newStatus = e.target.value
               handleChange("status", newStatus)
-
               try {
-                await updateBudgetStatus.mutateAsync({
-                  id: formData.id,
-                  status: newStatus,
-                })
-
+                await updateBudgetStatus.mutateAsync({ id: formData.id, status: newStatus })
                 await queryClient.invalidateQueries({ queryKey: ["budget"] })
                 setIsEditingStatus(false)
-              } catch (err) {
-                console.error("Erro ao atualizar status:", err)
-                alert("Não foi possível atualizar o status. Tente novamente.")
+              } catch {
+                setAlert({ status: "error", message: "Falha ao atualizar status!" })
               }
             }}
             className="border text-sm rounded-md p-1 bg-white"
@@ -167,8 +210,8 @@ Preço: R$ ${orcamento.preco_viagem}`
             type="button"
             onClick={() => setIsEditingStatus(true)}
             className={`flex items-center gap-1 text-sm font-medium px-2 py-1 rounded-full transition ${formData.status === "Aprovada"
-              ? "bg-green-100 text-green-700 border border-green-300"
-              : "bg-yellow-100 text-yellow-700 border border-yellow-300"
+                ? "bg-green-100 text-green-700 border border-green-300"
+                : "bg-yellow-100 text-yellow-700 border border-yellow-300"
               }`}
           >
             {formData.status === "Aprovada" ? (
@@ -194,15 +237,9 @@ Preço: R$ ${orcamento.preco_viagem}`
                 <span className="text-sm font-medium">Origem:</span>
               </div>
               {isEditing ? (
-                <Input
-                  value={formData.origem}
-                  onChange={(e) => handleChange("origem", e.target.value)}
-                  className="ml-6"
-                />
+                <Input value={formData.origem} onChange={(e) => handleChange("origem", e.target.value)} className="ml-6" />
               ) : (
-                <p className="text-gray-900 text-sm sm:text-base mt-1 ml-6">
-                  {formData.origem}
-                </p>
+                <p className="text-gray-900 text-sm sm:text-base mt-1 ml-6">{formData.origem}</p>
               )}
             </div>
             <div>
@@ -211,20 +248,14 @@ Preço: R$ ${orcamento.preco_viagem}`
                 <span className="text-sm font-medium">Destino:</span>
               </div>
               {isEditing ? (
-                <Input
-                  value={formData.destino}
-                  onChange={(e) => handleChange("destino", e.target.value)}
-                  className="ml-6"
-                />
+                <Input value={formData.destino} onChange={(e) => handleChange("destino", e.target.value)} className="ml-6" />
               ) : (
-                <p className="text-gray-900 text-sm sm:text-base mt-1 ml-6">
-                  {formData.destino}
-                </p>
+                <p className="text-gray-900 text-sm sm:text-base mt-1 ml-6">{formData.destino}</p>
               )}
             </div>
           </div>
 
-          {/* Carro e Motorista */}
+          {/* Carro e Motoristas */}
           <div className="space-y-4">
             <div>
               <div className="flex items-center text-gray-600">
@@ -254,15 +285,20 @@ Preço: R$ ${orcamento.preco_viagem}`
             <div>
               <div className="flex items-center text-gray-600">
                 <User className="w-4 h-4 mr-2 text-orange-500" />
-                <span className="text-sm font-medium">Motorista:</span>
+                <span className="text-sm font-medium">Motorista(s):</span>
               </div>
               {isEditing ? (
                 <select
+                  multiple
                   className="ml-6 border rounded-md p-2 text-sm w-full"
-                  value={formData.motorista}
-                  onChange={(e) => handleChange("motorista", e.target.value)}
+                  value={formData.motoristas}
+                  onChange={(e) =>
+                    handleChange(
+                      "motoristas",
+                      Array.from(e.target.selectedOptions, (option) => option.value)
+                    )
+                  }
                 >
-                  <option value="">Selecione o motorista</option>
                   {drivers?.map((d: any) => (
                     <option key={d.id} value={String(d.id)}>
                       {d.name}
@@ -271,7 +307,7 @@ Preço: R$ ${orcamento.preco_viagem}`
                 </select>
               ) : (
                 <p className="text-gray-900 text-sm sm:text-base mt-1 ml-6">
-                  {findName(drivers || [], formData.motorista, formData.motorista)}
+                  {formData.motoristas.map((id: string) => findName(drivers || [], id, id)).join(", ")}
                 </p>
               )}
             </div>
@@ -309,9 +345,7 @@ Preço: R$ ${orcamento.preco_viagem}`
                 <Compass className="w-4 h-4 mr-2 text-blue-500" />
                 <span className="text-sm font-medium">Distância Total:</span>
               </div>
-              <p className="text-gray-900 text-sm sm:text-base mt-1 ml-6">
-                {formData.distancia_total} km
-              </p>
+              <p className="text-gray-900 text-sm sm:text-base mt-1 ml-6">{formData.distancia_total} km</p>
             </div>
           </div>
 
@@ -323,20 +357,10 @@ Preço: R$ ${orcamento.preco_viagem}`
                 <span className="text-sm font-medium">Data/Horário Ida:</span>
               </div>
               {isEditing ? (
-                <Input
-                  type="datetime-local"
-                  value={formData.data_hora_viagem}
-                  onChange={(e) =>
-                    handleChange("data_hora_viagem", e.target.value)
-                  }
-                  className="ml-6"
-                />
+                <Input type="datetime-local" value={formData.data_hora_viagem} onChange={(e) => handleChange("data_hora_viagem", e.target.value)} className="ml-6" />
               ) : (
                 <p className="text-gray-900 text-sm sm:text-base mt-1 ml-6">
-                  {new Date(formData.data_hora_viagem).toLocaleString("pt-BR", {
-                    dateStyle: "short",
-                    timeStyle: "short",
-                  })}
+                  {new Date(formData.data_hora_viagem).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
                 </p>
               )}
             </div>
@@ -344,27 +368,13 @@ Preço: R$ ${orcamento.preco_viagem}`
             <div>
               <div className="flex items-center text-gray-600">
                 <Calendar className="w-4 h-4 mr-2 text-red-500" />
-                <span className="text-sm font-medium">
-                  Data/Horário Retorno:
-                </span>
+                <span className="text-sm font-medium">Data/Horário Retorno:</span>
               </div>
               {isEditing ? (
-                <Input
-                  type="datetime-local"
-                  value={formData.date_hour_return_trip}
-                  onChange={(e) =>
-                    handleChange("date_hour_return_trip", e.target.value)
-                  }
-                  className="ml-6"
-                />
+                <Input type="datetime-local" value={formData.date_hour_return_trip} onChange={(e) => handleChange("date_hour_return_trip", e.target.value)} className="ml-6" />
               ) : (
                 <p className="text-gray-900 text-sm sm:text-base mt-1 ml-6">
-                  {new Date(
-                    formData.date_hour_return_trip
-                  ).toLocaleString("pt-BR", {
-                    dateStyle: "short",
-                    timeStyle: "short",
-                  })}
+                  {new Date(formData.date_hour_return_trip).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
                 </p>
               )}
             </div>
@@ -376,17 +386,29 @@ Preço: R$ ${orcamento.preco_viagem}`
           <div className="flex items-center space-x-10">
             <div className="flex items-center text-green-600 font-bold text-xl">
               <DollarSign className="w-5 h-5 mr-1" />
-              {formData.preco_viagem.toLocaleString("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-              })}
+              {isEditing ? (
+                <Input
+                  type="number"
+                  value={formData.preco_viagem}
+                  onChange={(e) => handleChange("preco_viagem", parseFloat(e.target.value))}
+                  className="w-32 ml-1"
+                />
+              ) : (
+                formData.preco_viagem.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
+              )}
             </div>
             <div className="flex items-center text-blue-600 font-medium">
               <span className="mr-1">Lucro:</span>
-              {formData.lucro.toLocaleString("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-              })}
+              {isEditing ? (
+                <Input
+                  type="number"
+                  value={formData.lucroDesejado}
+                  onChange={(e) => handleChange("lucroDesejado", parseFloat(e.target.value))}
+                  className="w-32"
+                />
+              ) : (
+                  formData.lucroDesejado.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
+              )}
             </div>
           </div>
 
@@ -395,13 +417,19 @@ Preço: R$ ${orcamento.preco_viagem}`
               variant="outline"
               size="sm"
               className="flex items-center gap-2 border text-black hover:bg-green-50 hover:text-green-600"
-              onClick={() =>
-                window.open(gerarLinkWhatsApp(formData), "_blank")
-              }
+              onClick={() => {
+                const orcamentoParaWhatsApp: Orcamento = {
+                  ...formData,
+                  car_id: formData.carro,
+                  driver_id: formData.motoristas,
+                  cliente_id: formData.cliente,
+                };
+                window.open(gerarLinkWhatsApp(orcamentoParaWhatsApp), "_blank");
+              }}
             >
-              <MessageSquare className="w-4 h-4 text-green-500" />
-              Enviar no WhatsApp
+              <MessageSquare className="w-4 h-4 text-green-500" /> Enviar no WhatsApp
             </Button>
+
 
             <Button
               variant="outline"
@@ -409,51 +437,28 @@ Preço: R$ ${orcamento.preco_viagem}`
               className="flex items-center gap-2 border text-black hover:bg-green-50 hover:text-green-600"
               onClick={async () => {
                 const blob = await pdf(<BudgetReceipt dados={formData} />).toBlob()
-                const viagemDate = new Date(
-                  formData.data_hora_viagem
-                ).toLocaleDateString("pt-BR")
+                const viagemDate = new Date(formData.data_hora_viagem).toLocaleDateString("pt-BR")
                 saveAs(blob, `ticket-${formData.cliente}-${viagemDate}.pdf`)
               }}
             >
-              <FileText className="w-4 h-4" />
-              Holerite
+              <FileText className="w-4 h-4" /> Holerite
             </Button>
 
             {isEditing ? (
               <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2 border text-black hover:bg-green-50 hover:text-green-600"
-                  onClick={handleSave}
-                >
+                <Button variant="outline" size="sm" className="flex items-center gap-2 border text-black hover:bg-green-50 hover:text-green-600" onClick={handleSave}>
                   Salvar
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2 border text-gray-600 hover:bg-gray-100"
-                  onClick={() => setIsEditing(false)}
-                >
+                <Button variant="outline" size="sm" className="flex items-center gap-2 border text-gray-600 hover:bg-gray-100" onClick={() => setIsEditing(false)}>
                   Cancelar
                 </Button>
               </>
             ) : (
               <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2 border text-blue-600 hover:bg-blue-50 hover:text-blue-600"
-                  onClick={() => setIsEditing(true)}
-                >
+                <Button variant="outline" size="sm" className="flex items-center gap-2 border text-blue-600 hover:bg-blue-50 hover:text-blue-600" onClick={() => setIsEditing(true)}>
                   Editar
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2 border text-red-600 hover:bg-red-50"
-                  onClick={handleDelete}
-                >
+                <Button variant="outline" size="sm" className="flex items-center gap-2 border text-red-600 hover:bg-red-50" onClick={() => handleDeleteClick(orcamento)}>
                   Excluir
                 </Button>
               </>
@@ -461,6 +466,37 @@ Preço: R$ ${orcamento.preco_viagem}`
           </div>
         </div>
       </CardContent>
+
+      {/* Dialogo de exclusão */}
+      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <DialogPortal>
+          <DialogOverlay className="fixed inset-0 bg-black/50 z-[999]" />
+          <div className="fixed inset-0 flex items-center justify-center z-[1000] px-4">
+            <DialogContent className="w-full max-w-sm bg-white rounded-2xl shadow-lg p-6 relative">
+              <DialogHeader>
+                <DialogTitle>Confirmar exclusão</DialogTitle>
+              </DialogHeader>
+              <p className="text-sm text-gray-600 mt-2">
+                Tem certeza que deseja excluir este orçamento?
+              </p>
+              <DialogFooter className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setDeleteConfirmOpen(false)} className="w-24">
+                  Cancelar
+                </Button>
+                <Button variant="destructive" onClick={confirmDelete} className="w-24">
+                  Excluir
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </div>
+        </DialogPortal>
+      </Dialog>
+
+      {alert && (
+        <div className="fixed bottom-5 right-5 sm:right-8 w-72 sm:w-96 z-[2000]">
+          <BackendAlert status={alert.status} message={alert.message} />
+        </div>
+      )}
     </Card>
   )
 }

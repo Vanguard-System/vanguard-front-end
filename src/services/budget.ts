@@ -23,7 +23,7 @@ export async function createBudget(budgetData: {
   impostoPercent: number
   numMotoristas: number
   custoExtra: number
-  driver_id: string
+  driver_id: string[] 
   car_id: string
   cliente_id: string
 }) {
@@ -31,7 +31,6 @@ export async function createBudget(budgetData: {
   return data
 }
 
-// Atualiza um budget
 export async function updateBudget(
   id: string,
   budgetData: Partial<{
@@ -44,7 +43,7 @@ export async function updateBudget(
     impostoPercent: number
     numMotoristas: number
     custoExtra: number
-    driver_id: string
+    driver_id: string[] 
     car_id: string
     cliente_id: string
   }>
