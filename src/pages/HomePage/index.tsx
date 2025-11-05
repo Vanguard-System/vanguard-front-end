@@ -1,67 +1,97 @@
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import BudgetModal from "@/components/modal"
 import { useBudgetTrips } from "@/services/hooks/useBudget"
 import TripCard from "@/components/TripCard"
 import type { BudgetTrip } from "@/types/trip"
-import title from "@/assets/title.jpeg" // importa a imagem
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  Tooltip,
+  CartesianGrid,
+} from "recharts"
 
 export default function Page() {
-  const [isModalOpen, setIsModalOpen] = useState(false)
   const { data: trip = [], isLoading } = useBudgetTrips()
 
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 5
   const totalPages = Math.ceil(trip.length / itemsPerPage)
-  const paginatedOrcamentos = trip.slice(
+  const paginatedTrips = trip.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   )
 
+  const destinosData = useMemo(() => {
+    const grouped: Record<string, number> = {}
+    trip.forEach((t: any) => {
+      if (t.destino) grouped[t.destino] = (grouped[t.destino] || 0) + 1
+    })
+    return Object.entries(grouped)
+      .map(([name, Quantidade]) => ({ name, Quantidade }))
+      .sort((a, b) => b.Quantidade - a.Quantidade)
+  }, [trip])
+
   return (
     <div className="ml-0 lg:ml-64 p-4 mt-10 sm:p-6 lg:p-8">
-      {/* Cabeçalho */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-6 mb-6 gap-4">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Lista de Viagens</h1>
       </div>
 
-      {/* Estatísticas */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8 mb-8 items-center">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">Total de Orçamentos</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl sm:text-2xl font-bold text-gray-900">{trip.length}</div>
+      <div className="flex flex-col sm:flex-row gap-4 mt-8 mb-8 items-stretch">
+        <Card className="w-full sm:w-1/4 flex items-center justify-center">
+          <CardContent className="flex flex-col items-center justify-center py-6">
+            <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 mb-1">
+              Total de Orçamentos
+            </CardTitle>
+            <div className="text-3xl font-bold text-gray-900 text-center">{trip.length}</div>
           </CardContent>
         </Card>
 
-        {/* Imagem ao lado do card */}
-        <div className="flex justify-center items-center">
-          <img src={title} alt="Imagem teste" className="max-h-32 object-contain" />
-        </div>
+        {/* Gráfico ocupa o restante */}
+        <Card className="flex-1">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">
+              Viagens por Destino
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="h-32">
+            {destinosData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={destinosData}
+                  margin={{ top: 5, right: 10, left: 0, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="name" tick={{ fontSize: 10 }} interval={0} />
+                  <YAxis type="number" hide />
+                  <Tooltip />
+                  <Bar dataKey="Quantidade" radius={[3, 3, 0, 0]} barSize={10} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-center text-sm text-gray-500 mt-6">
+                Nenhum dado disponível.
+              </p>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Modal de cadastro */}
-      <BudgetModal open={isModalOpen} onOpenChange={setIsModalOpen} />
-
-      {/* Lista de orçamentos com paginação */}
       <div className="flex flex-col gap-6">
-        {paginatedOrcamentos.map((trip: BudgetTrip) => (
-          <TripCard
-            key={trip.id}
-            trip={trip}
-          />
+        {paginatedTrips.map((trip: BudgetTrip) => (
+          <TripCard key={trip.id} trip={trip} />
         ))}
       </div>
 
-      {/* Paginação */}
       <div className="flex justify-center items-center mt-6 gap-2">
         <Button
           variant="outline"
           disabled={currentPage === 1}
-          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
         >
           Anterior
         </Button>
@@ -71,7 +101,7 @@ export default function Page() {
         <Button
           variant="outline"
           disabled={currentPage === totalPages || totalPages === 0}
-          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
         >
           Próximo
         </Button>

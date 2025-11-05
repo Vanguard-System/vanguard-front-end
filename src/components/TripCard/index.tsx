@@ -50,7 +50,11 @@ export default function TripCard({ trip }: TripCardProps) {
                 <User className="w-4 h-4 mr-2 text-orange-500" />
                 <span className="text-sm font-medium">Motorista:</span>
               </div>
-              <p className="text-gray-900 text-sm sm:text-base mt-1 ml-6">{trip.driver_id}</p>
+              <p className="text-gray-900 text-sm sm:text-base mt-1 ml-6">
+                {trip.driver_id && trip.driver_id.length > 0
+                  ? trip.driver_id.join(", ")
+                  : "Nenhum motorista"}
+              </p>
             </div>
           </div>
 

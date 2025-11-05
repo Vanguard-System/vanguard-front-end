@@ -1,12 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useToast } from "@/hooks/use-toast"
 import { useCreateCar } from "@/services/hooks/useCar"
+import BackendAlert from "@/components/BackendAlert"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Info } from "lucide-react"
 
@@ -14,7 +14,7 @@ interface CarData {
   model: string
   plate: string
   consumption: number
-  fixed_cost:  number
+  fixed_cost: number
 }
 
 export function CarRegisterForm() {
@@ -25,23 +25,37 @@ export function CarRegisterForm() {
     fixed_cost: 0,
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { toast } = useToast()
+  const [alert, setAlert] = useState<{ status: 'success' | 'error'; message: string } | null>(null)
+
   const createCarMutation = useCreateCar()
 
+  // Auto-hide alert after 4s
+  useEffect(() => {
+    if (!alert) return
+    const timer = setTimeout(() => setAlert(null), 4000)
+    return () => clearTimeout(timer)
+  }, [alert])
+
   const handleInputChange = (field: keyof CarData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    // Converte números corretamente
+    if (field === "consumption" || field === "fixed_cost") {
+      const num = parseFloat(value)
+      setFormData(prev => ({ ...prev, [field]: isNaN(num) ? 0 : num }))
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }))
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!formData.model.trim()) {
-      toast({ title: "Erro", description: "Modelo é obrigatório", variant: "destructive" })
+      setAlert({ status: "error", message: "Modelo é obrigatório" })
       return
     }
 
     if (!formData.plate.trim()) {
-      toast({ title: "Erro", description: "Placa é obrigatória", variant: "destructive" })
+      setAlert({ status: "error", message: "Placa é obrigatória" })
       return
     }
 
@@ -49,24 +63,31 @@ export function CarRegisterForm() {
 
     try {
       await createCarMutation.mutateAsync(formData)
-      toast({ title: "Sucesso", description: "Carro cadastrado com sucesso" })
+      setAlert({ status: "success", message: "Carro cadastrado com sucesso" })
       setFormData({ model: "", plate: "", consumption: 0, fixed_cost: 0 })
-    } catch {
-      toast({ title: "Erro", description: "Falha ao cadastrar carro", variant: "destructive" })
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || "Falha ao cadastrar carro"
+      setAlert({ status: "error", message: msg })
     } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <div className="flex flex-1 p-4 md:p-6 ml-0 mt-20 md:ml-64">
+    <div className="flex flex-1 p-4 md:p-6 ml-0 mt-20 md:ml-64 relative">
+      {/* Alert Backend */}
+      {alert && (
+        <div className="fixed bottom-5 right-5 sm:right-8 w-72 sm:w-96 z-50">
+          <BackendAlert status={alert.status} message={alert.message} />
+        </div>
+      )}
+
       <Card className="w-full">
         <CardHeader>
           <CardTitle>Dados do Carro</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Ajuste principal: grid de 2 colunas em telas médias ou maiores */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="model">Modelo</Label>
@@ -100,14 +121,14 @@ export function CarRegisterForm() {
                         <Info className="w-4 h-4 text-gray-500 cursor-pointer" />
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>Informe o consumo médio do veículo por km(ex: 2.5 ou 8).</p>
+                        <p>Informe o consumo médio do veículo por km (ex: 2.5 ou 8).</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
                 </div>
                 <Input
                   id="consumption"
-                  type="text"
+                  type="number"
                   placeholder="Digite o consumo do veículo"
                   value={formData.consumption}
                   onChange={e => handleInputChange("consumption", e.target.value)}
@@ -117,22 +138,21 @@ export function CarRegisterForm() {
 
               <div className="space-y-2">
                 <div className="flex items-center gap-1">
-                  <Label htmlFor="fixedCost">Preço fixo</Label>
+                  <Label htmlFor="fixed_cost">Preço fixo</Label>
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Info className="w-4 h-4 text-gray-500 cursor-pointer" />
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>Digite o custo fixo mensal para manter o veículo
-                           (ex: seguro, documentação, internet, etc.).</p>
+                        <p>Digite o custo fixo mensal para manter o veículo (ex: seguro, documentação, etc.).</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
                 </div>
                 <Input
-                  id="fixedCost"
-                  type="text"
+                  id="fixed_cost"
+                  type="number"
                   placeholder="Digite o custo fixo do veículo"
                   value={formData.fixed_cost}
                   onChange={e => handleInputChange("fixed_cost", e.target.value)}

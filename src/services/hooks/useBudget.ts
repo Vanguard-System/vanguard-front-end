@@ -39,7 +39,7 @@ export function useCreateBudget() {
       impostoPercent: number
       numMotoristas: number
       custoExtra: number
-      driver_id: string
+      driver_id: string[]
       car_id: string
       cliente_id: string
     }) => createBudget(data),
@@ -69,7 +69,7 @@ export function useUpdateBudget() {
         impostoPercent: number
         numMotoristas: number
         custoExtra: number
-        driver_id: string
+        driver_ids: string[]
         car_id: string
         cliente_id: string
       }>

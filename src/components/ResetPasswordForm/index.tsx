@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Eye, EyeOff, Lock, Mail } from "lucide-react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { useResetPassword } from "@/services/hooks/useUsers"
+import BackendAlert from "../BackendAlert"
 
 export default function ResetPasswordForm() {
   const navigate = useNavigate()
@@ -23,6 +24,7 @@ export default function ResetPasswordForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { mutate: resetPassword, isPending, isSuccess } = useResetPassword()
+  const [alert, setAlert] = useState<{ status: 'success' | 'error'; message: string } | null>(null)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -36,9 +38,18 @@ export default function ResetPasswordForm() {
         setError(null)
         navigate("/login")
       },
-      onError: () => setError("Código inválido ou expirado."),
+      onError: (err: any) => {
+        const backendMessage = err?.response?.data?.message || err?.message || "Falha ao mudar senha"
+        setAlert({ status: "error", message: backendMessage })
+      },    
     })
   }
+
+  useEffect(() => {
+    if (!alert) return
+    const timer = setTimeout(() => setAlert(null), 4000)
+    return () => clearTimeout(timer)
+  }, [alert])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br p-4">
@@ -113,6 +124,12 @@ export default function ResetPasswordForm() {
           </CardFooter>
         </form>
       </Card>
+
+      {alert && (
+        <div className="fixed bottom-5 right-5 sm:right-8 w-72 sm:w-96 z-50">
+          <BackendAlert status={alert.status} message={alert.message} />
+        </div>
+      )}
     </div>
   )
 }

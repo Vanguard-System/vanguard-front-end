@@ -14,6 +14,7 @@ import { useDriver } from "@/services/hooks/useDriver"
 import { useClient } from "@/services/hooks/useClient"
 import { useCar } from "@/services/hooks/useCar"
 import { useCreateBudget } from "@/services/hooks/useBudget"
+import BackendAlert from "../BackendAlert"
 
 type BudgetModalProps = {
   open: boolean
@@ -24,7 +25,6 @@ export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
   const [selectedDrivers, setSelectedDrivers] = useState<string[]>([])
   const [selectedCar, setSelectedCar] = useState<string>("")
   const [selectedClient, setSelectedClient] = useState<string>("")
-
   const [origem, setOrigem] = useState("")
   const [destino, setDestino] = useState("")
   const [dataPartida, setDataPartida] = useState("")
@@ -34,98 +34,96 @@ export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
   const [impostoPercent, setImpostoPercent] = useState<number>(0)
   const [custoExtra, setCustoExtra] = useState<number>(0)
   const [numMotoristas, setNumMotoristas] = useState<number>(1)
+  const [alert, setAlert] = useState<{ status: "success" | "error"; message: string } | null>(null)
 
   const { data: drivers, isLoading: isDriversLoading } = useDriver()
-  const { data: cars, isLoading: isCarLoading } = useCar()
-  const { data: clients, isLoading: isClientLoading } = useClient()
-  const { mutate: createBudget, isPending, isSuccess, isError } = useCreateBudget()
+  const { data: cars } = useCar()
+  const { data: clients } = useClient()
+  const { mutate: createBudget, isPending } = useCreateBudget()
 
   const [driversOpen, setDriversOpen] = useState(false)
-  const [carsOpen, setCarsOpen] = useState(false)
-
   const driversRef = useRef<HTMLDivElement>(null)
-  const carsRef = useRef<HTMLDivElement>(null)
 
-  // Fecha dropdown ao clicar fora
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (driversRef.current && !driversRef.current.contains(event.target as Node)) {
         setDriversOpen(false)
-      }
-      if (carsRef.current && !carsRef.current.contains(event.target as Node)) {
-        setCarsOpen(false)
       }
     }
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  // Atualiza o número de motoristas automaticamente
   useEffect(() => {
     setNumMotoristas(selectedDrivers.length || 1)
   }, [selectedDrivers])
 
+  const resetForm = () => {
+    setSelectedDrivers([])
+    setSelectedCar("")
+    setSelectedClient("")
+    setOrigem("")
+    setDestino("")
+    setDataPartida("")
+    setDataRetorno("")
+    setPedagio(0)
+    setLucroDesejado(0)
+    setImpostoPercent(0)
+    setCustoExtra(0)
+    setNumMotoristas(1)
+  }
+
   const handleSubmit = () => {
-    if (!selectedClient || selectedDrivers.length === 0 || selectedCar.length === 0) {
-      alert("Selecione motorista(s), carro(s) e cliente antes de salvar.")
+    if (!selectedClient || selectedDrivers.length === 0 || !selectedCar || !origem || !destino || !dataPartida) {
+      setAlert({ status: "error", message: "Preencha todos os campos obrigatórios antes de continuar." })
       return
     }
 
-    const payload = {
-      origem,
-      destino,
-      data_hora_viagem: dataPartida,
-      data_hora_viagem_retorno: dataRetorno,
-      pedagio,
-      lucroDesejado,
-      impostoPercent,
-      numMotoristas,
-      custoExtra,
-      driver_id: selectedDrivers[0],
-      car_id: selectedCar,
-      cliente_id: selectedClient,
-    }
-
-    createBudget(payload, {
-      onSuccess: () => {
-        // Fecha o modal
-        onOpenChange(false)
-
-        // Limpa os campos
-        setSelectedDrivers([])
-        setSelectedCar("")
-        setSelectedClient("")
-        setOrigem("")
-        setDestino("")
-        setDataPartida("")
-        setDataRetorno("")
-        setPedagio(0)
-        setLucroDesejado(0)
-        setImpostoPercent(0)
-        setCustoExtra(0)
-        setNumMotoristas(1)
+    createBudget(
+      {
+        origem,
+        destino,
+        data_hora_viagem: dataPartida,
+        data_hora_viagem_retorno: dataRetorno || "",
+        pedagio,
+        lucroDesejado,
+        impostoPercent,
+        custoExtra,
+        numMotoristas,
+        driver_id: selectedDrivers,
+        car_id: selectedCar,
+        cliente_id: selectedClient,
       },
-      onError: (err) => console.error(err),
-    })
+      {
+        onSuccess: () => {
+          onOpenChange(false)
+          resetForm()
+          setAlert({ status: "success", message: "Orçamento cadastrado com sucesso" })
+        },
+        onError: (err: any) => {
+          const backendMessage = err?.response?.data?.message || err?.message || "Falha ao cadastrar orçamento"
+          setAlert({ status: "error", message: backendMessage })
+        },
+      }
+    )
   }
 
-
+  useEffect(() => {
+    if (!alert) return
+    const timer = setTimeout(() => setAlert(null), 4000)
+    return () => clearTimeout(timer)
+  }, [alert])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-center">
-            Cadastrar Orçamento
-          </DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-center">Cadastrar Orçamento</DialogTitle>
         </DialogHeader>
 
         <div className="grid gap-6 py-4">
 
-          {/* Motoristas e Carros */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-            {/* Motoristas */}
             <div className="grid gap-2 relative" ref={driversRef}>
               <Label>Motoristas</Label>
               <Button
@@ -134,91 +132,59 @@ export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
                 className="text-left truncate max-w-full"
               >
                 {selectedDrivers.length > 0
-                  ? drivers
-                    ?.filter((d: any) => selectedDrivers.includes(d.id))
-                    .map((d: any) => d.name)
-                    .join(", ")
+                  ? drivers?.filter((d: any) => selectedDrivers.includes(d.id)).map((d: any) => d.name).join(", ")
                   : "Selecione motoristas"}
               </Button>
               {driversOpen && (
                 <div className="absolute z-50 border rounded p-2 max-h-40 overflow-y-auto mt-1 w-full bg-white shadow-md">
-                  {isDriversLoading ? (
-                    <p>Carregando...</p>
-                  ) : (
-                    drivers?.map((driver: any) => (
-                      <label key={driver.id} className="flex items-center space-x-2 py-1">
+                  {isDriversLoading ? <p>Carregando...</p> :
+                    drivers?.map((d: any) => (
+                      <label key={d.id} className="flex items-center space-x-2 py-1">
                         <input
                           type="checkbox"
-                          checked={selectedDrivers.includes(driver.id)}
-                          onChange={(e) => {
+                          checked={selectedDrivers.includes(d.id)}
+                          onChange={e => {
                             const checked = e.target.checked
                             setSelectedDrivers(prev =>
-                              checked
-                                ? [...prev, driver.id]
-                                : prev.filter(id => id !== driver.id)
+                              checked ? [...prev, d.id] : prev.filter(id => id !== d.id)
                             )
                           }}
                         />
-                        <span>{driver.name}</span>
+                        <span>{d.name}</span>
                       </label>
-                    ))
-                  )}
+                    ))}
                 </div>
               )}
             </div>
 
-            {/* Carros */}
             <div className="grid gap-2">
               <Label>Carro</Label>
-              <select
-                className="border rounded-md p-2"
-                value={selectedCar}
-                onChange={(e) => setSelectedCar(e.target.value)}
-              >
+              <select className="border rounded-md p-2" value={selectedCar} onChange={e => setSelectedCar(e.target.value)}>
                 <option value="">Selecione o carro</option>
-                {cars?.map((c: any) => (
-                  <option key={c.id} value={c.id}>{c.model}</option>
-                ))}
+                {cars?.map((c: any) => (<option key={c.id} value={c.id}>{c.model}</option>))}
               </select>
             </div>
           </div>
 
-          {/* Cliente */}
           <div className="grid gap-2">
             <Label>Cliente</Label>
-            <select
-              className="border rounded-md p-2"
-              value={selectedClient}
-              onChange={(e) => setSelectedClient(e.target.value)}
-            >
+            <select className="border rounded-md p-2" value={selectedClient} onChange={e => setSelectedClient(e.target.value)}>
               <option value="">Selecione o cliente</option>
-              {clients?.map((c: any) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
+              {clients?.map((c: any) => (<option key={c.id} value={c.id}>{c.name}</option>))}
             </select>
           </div>
 
-          {/* Origem e Destino */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label>Origem</Label>
-              <Input
-                value={origem}
-                onChange={e => setOrigem(e.target.value)}
-                placeholder="Endereço de origem"
-              />
+              <Input value={origem} onChange={e => setOrigem(e.target.value)} placeholder="Ex: Joinville, SC" />
             </div>
             <div className="grid gap-2">
               <Label>Destino</Label>
-              <Input
-                value={destino}
-                onChange={e => setDestino(e.target.value)}
-                placeholder="Endereço de destino"
-              />
+              <Input value={destino} onChange={e => setDestino(e.target.value)} placeholder="Ex: Curitiba, PR" />
             </div>
           </div>
 
-          {/* Datas */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label>Data e Hora Partida</Label>
@@ -230,24 +196,22 @@ export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
             </div>
           </div>
 
-          {/* Pedágio e Imposto */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="grid gap-2">
               <Label>Pedágio</Label>
               <Input type="number" value={pedagio} onChange={e => setPedagio(Number(e.target.value))} step={0.01} />
             </div>
-            <div className="grid gap-2 relative">
+            <div className="grid gap-2">
               <Label>Imposto (%)</Label>
               <Input type="number" value={impostoPercent} onChange={e => setImpostoPercent(Number(e.target.value))} step={0.01} />
             </div>
-          </div>
-
-          {/* Lucro, Custo Extra e Nº Motoristas */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="grid gap-2">
               <Label>Lucro Desejado</Label>
               <Input type="number" value={lucroDesejado} onChange={e => setLucroDesejado(Number(e.target.value))} step={0.01} />
             </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label>Custo Extra</Label>
               <Input type="number" value={custoExtra} onChange={e => setCustoExtra(Number(e.target.value))} step={0.01} />
@@ -258,18 +222,18 @@ export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
             </div>
           </div>
 
-          {/* Botões */}
           <div className="flex gap-3 pt-4">
-            <Button variant="outline" className="flex-1" onClick={() => onOpenChange(false)}>Cancelar</Button>
+            <Button variant="outline" className="flex-1" onClick={() => { onOpenChange(false); resetForm() }}>Cancelar</Button>
             <Button className="flex-1" onClick={handleSubmit} disabled={isPending}>{isPending ? "Salvando..." : "Salvar Orçamento"}</Button>
           </div>
-
-          {/* Feedback */}
-          {isSuccess && <p className="text-green-600 text-center">✅ Orçamento criado com sucesso!</p>}
-          {isError && <p className="text-red-600 text-center">❌ Erro ao criar orçamento.</p>}
-
         </div>
       </DialogContent>
+
+      {alert && (
+        <div className="fixed bottom-5 right-5 sm:right-8 w-72 sm:w-96 z-50">
+          <BackendAlert status={alert.status} message={alert.message} />
+        </div>
+      )}
     </Dialog>
   )
 }

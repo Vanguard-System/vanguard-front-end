@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -11,6 +11,7 @@ import { Eye, EyeOff, Mail, Lock, User } from "lucide-react"
 import { login } from "@/services/auth"
 import { CreateUser } from "@/services/users"
 import { useNavigate } from "react-router-dom"
+import BackendAlert from "@/components/BackendAlert" 
 
 interface AuthFormData {
   email: string
@@ -30,7 +31,7 @@ export default function AuthForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<Partial<AuthFormData>>({})
-  const [apiResponse, setApiResponse] = useState<any>(null)
+  const [alert, setAlert] = useState<{ status: 'success' | 'error'; message: string } | null>(null)
   const navigate = useNavigate()
 
   const validateForm = (): boolean => {
@@ -50,7 +51,7 @@ export default function AuthForm() {
 
     if (!formData.password) {
       newErrors.password = "Senha é obrigatória"
-    } 
+    }
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -66,8 +67,8 @@ export default function AuthForm() {
     try {
       if (isLogin) {
         const res = await login(formData.email, formData.password)
-        setApiResponse(res)
         console.log("Login realizado:", res)
+        setAlert({ status: 'success', message: "Login realizado com sucesso!" })
         navigate("/Budget")
       } else {
         const res = await CreateUser({
@@ -75,13 +76,13 @@ export default function AuthForm() {
           username: formData.username!,
           password: formData.password,
         })
-        setApiResponse(res)
-        console.log("Cadastro realizado:", res)
+        setAlert({ status: 'success', message: "Cadastro realizado com sucesso!" })
         setIsLogin(true)
         navigate("/login")
       }
-    } catch (error) {
-      console.error(`Erro no ${isLogin ? "login" : "cadastro"}:`, error)
+    } catch (error: any) {
+      const msg = error?.response?.data?.message || error?.message || "Ocorreu um erro"
+      setAlert({ status: 'error', message: msg })
     } finally {
       setIsLoading(false)
     }
@@ -105,13 +106,17 @@ export default function AuthForm() {
     })
   }
 
+  useEffect(() => {
+    if (!alert) return
+    const timer = setTimeout(() => setAlert(null), 4000)
+    return () => clearTimeout(timer)
+  }, [alert])
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br p-4">
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="space-y-1 text-center">
-          <div className="mx-auto w-20 h-20 bg-primary rounded-full flex items-center justify-center mb-4">
-            <User className="w-10 h-10 text-primary-foreground" />
-          </div>
+          <img src="src/assets/title.jpeg" alt="Descrição da imagem" />
           <CardTitle className="text-2xl font-bold">{isLogin ? "Bem-vindo" : "Criar Conta"}</CardTitle>
           <CardDescription>
             {isLogin
@@ -122,7 +127,6 @@ export default function AuthForm() {
 
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
-            {/* Email */}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
@@ -139,7 +143,6 @@ export default function AuthForm() {
               {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
             </div>
 
-            {/* Username (somente no cadastro) */}
             {!isLogin && (
               <div className="space-y-2">
                 <Label htmlFor="username">Username</Label>
@@ -158,7 +161,6 @@ export default function AuthForm() {
               </div>
             )}
 
-            {/* Senha */}
             <div className="space-y-2">
               <Label htmlFor="password">Senha</Label>
               <div className="relative">
@@ -178,17 +180,12 @@ export default function AuthForm() {
                   className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-muted-foreground" />
-                  )}
+                  {showPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
                 </Button>
               </div>
               {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
             </div>
 
-            {/* Lembrar e Esqueceu senha */}
             {isLogin && (
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
@@ -227,6 +224,12 @@ export default function AuthForm() {
           </CardFooter>
         </form>
       </Card>
+
+      {alert && (
+        <div className="fixed bottom-5 right-5 sm:right-8 w-72 sm:w-96 z-50">
+          <BackendAlert status={alert.status} message={alert.message} />
+        </div>
+      )}
     </div>
   )
 }

@@ -39,49 +39,50 @@ export default function BudgetPage() {
       </div>
 
       {/* Estatísticas */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8 mb-8">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">Total de Orçamentos</CardTitle>
+      {/* Estatísticas */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8 mb-8 w-full">
+        <Card className="flex flex-col justify-center items-center h-32 shadow-md hover:shadow-lg transition-all duration-200 w-full">
+          <CardHeader className="pb-1 text-center">
+            <CardTitle className="text-sm sm:text-base font-medium text-gray-600">
+              Total de Orçamentos
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-xl sm:text-2xl font-bold text-gray-900">{orcamentos.length}</div>
+            <div className="text-2xl sm:text-3xl font-bold text-gray-900">
+              {orcamentos.length}
+            </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">Aprovadas</CardTitle>
+        <Card className="flex flex-col justify-center items-center h-32 shadow-md hover:shadow-lg transition-all duration-200 w-full">
+          <CardHeader className="pb-1 text-center">
+            <CardTitle className="text-sm sm:text-base font-medium text-gray-600">
+              Aprovadas
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-xl sm:text-2xl font-bold text-green-600">
+            <div className="text-2xl sm:text-3xl font-bold text-green-600">
               {orcamentos.filter((v: any) => v.status === "Aprovada").length}
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">Pendentes</CardTitle>
+        <Card className="flex flex-col justify-center items-center h-32 shadow-md hover:shadow-lg transition-all duration-200 w-full">
+          <CardHeader className="pb-1 text-center">
+            <CardTitle className="text-sm sm:text-base font-medium text-gray-600">
+              Pendentes
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-xl sm:text-2xl font-bold text-yellow-600">
+            <div className="text-2xl sm:text-3xl font-bold text-yellow-600">
               {orcamentos.filter((v: any) => v.status === "Pendente").length}
             </div>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">Canceladas</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl sm:text-2xl font-bold text-red-600">
-              {orcamentos.filter((v: any) => v.status === "Cancelada").length}
-            </div>
-          </CardContent>
-        </Card>
       </div>
+
+
+
 
       {/* Modal de cadastro */}
       <BudgetModal open={isModalOpen} onOpenChange={setIsModalOpen} />
