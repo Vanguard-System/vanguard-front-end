@@ -58,7 +58,6 @@ export function FormClientRegister() {
     }
   }
 
-  // Remove alerta após 4 segundos
   useEffect(() => {
     if (!alert) return
     const timer = setTimeout(() => setAlert(null), 4000)

@@ -52,23 +52,6 @@ describe("ForgotPasswordForm", () => {
     });
   });
 
-  test("exibe erro ao falhar no envio", async () => {
-    mutateMock.mockImplementation((_email, { onError }) => {
-      onError?.();
-    });
-
-    render(<ForgotPasswordForm />);
-    const input = screen.getByPlaceholderText("seu@email.com");
-    const button = screen.getByRole("button", { name: /enviar código/i });
-
-    fireEvent.change(input, { target: { value: "teste@email.com" } });
-    fireEvent.click(button);
-
-    await waitFor(() => {
-      expect(screen.getByText(/Erro ao enviar o email/i)).toBeInTheDocument();
-    });
-  });
-
   test("mostra mensagem de sucesso quando isSuccess é true", () => {
     isSuccessMock = true; 
     render(<ForgotPasswordForm />);

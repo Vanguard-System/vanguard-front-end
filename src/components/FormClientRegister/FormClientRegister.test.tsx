@@ -1,89 +1,94 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react"
 import { FormClientRegister } from "."
+import { useCreateClient } from "@/services/hooks/useClient"
 
-const toastMock = jest.fn()
-jest.mock("@/hooks/use-toast", () => ({
-  useToast: () => ({ toast: toastMock }),
-}))
+jest.mock("@/services/hooks/useClient")
 
 const mutateAsyncMock = jest.fn()
-jest.mock("@/services/hooks/useClient", () => ({
-  useCreateClient: () => ({
+
+  ; (useCreateClient as jest.Mock).mockReturnValue({
     mutateAsync: mutateAsyncMock,
-  }),
-}))
+  })
 
 describe("FormClientRegister", () => {
   beforeEach(() => {
-    toastMock.mockClear()
-    mutateAsyncMock.mockClear()
+    jest.clearAllMocks()
   })
 
-  test("renderiza os campos e botão corretamente", () => {
+  test("renderiza o formulário com campos básicos", () => {
+    render(<FormClientRegister />)
+    expect(screen.getByLabelText(/nome completo/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/telefone/i)).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /cadastrar cliente/i })).toBeInTheDocument()
+  })
+
+  test("mostra erro se nome não for preenchido", async () => {
     render(<FormClientRegister />)
 
-    expect(screen.getByPlaceholderText(/Digite o nome completo/i)).toBeInTheDocument()
-    expect(screen.getByPlaceholderText(/exemplo@email.com/i)).toBeInTheDocument()
-    expect(screen.getByPlaceholderText(/\(DDD\) 999999999/i)).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: /Cadastrar Cliente/i })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole("button", { name: /cadastrar cliente/i }))
+
+    expect(await screen.findByText(/nome é obrigatório/i)).toBeInTheDocument()
+    expect(mutateAsyncMock).not.toHaveBeenCalled()
   })
 
-  test("chama mutateAsync e mostra toast de sucesso", async () => {
+  test("mostra erro se telefone não for preenchido", async () => {
+    render(<FormClientRegister />)
+
+    fireEvent.change(screen.getByLabelText(/nome completo/i), {
+      target: { value: "Maria" },
+    })
+    fireEvent.click(screen.getByRole("button", { name: /cadastrar cliente/i }))
+
+    expect(await screen.findByText(/telefone é obrigatório/i)).toBeInTheDocument()
+    expect(mutateAsyncMock).not.toHaveBeenCalled()
+  })
+
+  test("envia formulário com sucesso", async () => {
     mutateAsyncMock.mockResolvedValueOnce({})
 
     render(<FormClientRegister />)
-    fireEvent.change(screen.getByPlaceholderText(/Digite o nome completo/i), { target: { value: "Fulano" } })
-    fireEvent.change(screen.getByPlaceholderText(/\(DDD\) 999999999/i), { target: { value: "(11) 999999999" } })
-    fireEvent.change(screen.getByPlaceholderText(/exemplo@email.com/i), { target: { value: "fulano@email.com" } })
 
-    fireEvent.click(screen.getByRole("button", { name: /Cadastrar Cliente/i }))
+    fireEvent.change(screen.getByLabelText(/nome completo/i), {
+      target: { value: "Ana Silva" },
+    })
+    fireEvent.change(screen.getByLabelText(/email/i), {
+      target: { value: "ana@email.com" },
+    })
+    fireEvent.change(screen.getByLabelText(/telefone/i), {
+      target: { value: "(21)988887777" },
+    })
 
-    await waitFor(() => {
+    fireEvent.click(screen.getByRole("button", { name: /cadastrar cliente/i }))
+
+    await waitFor(() =>
       expect(mutateAsyncMock).toHaveBeenCalledWith({
-        name: "Fulano",
-        telephone: "(11) 999999999",
-        email: "fulano@email.com",
+        name: "Ana Silva",
+        email: "ana@email.com",
+        telephone: "(21)988887777",
       })
-      expect(toastMock).toHaveBeenCalledWith(expect.objectContaining({
-        description: "Cliente cadastrado com sucesso"
-      }))
-    })
-  })
-
-  test("mostra toast de erro ao falhar", async () => {
-    mutateAsyncMock.mockRejectedValueOnce(new Error("Erro"))
-
-    render(<FormClientRegister />)
-    fireEvent.change(screen.getByPlaceholderText(/Digite o nome completo/i), { target: { value: "Fulano" } })
-    fireEvent.change(screen.getByPlaceholderText(/\(DDD\) 999999999/i), { target: { value: "(11) 999999999" } })
-    fireEvent.change(screen.getByPlaceholderText(/exemplo@email.com/i), { target: { value: "fulano@email.com" } })
-
-    fireEvent.click(screen.getByRole("button", { name: /Cadastrar Cliente/i }))
-
-    await waitFor(() => {
-      expect(toastMock).toHaveBeenCalledWith(expect.objectContaining({
-        description: "Falha ao cadastrar cliente"
-      }))
-    })
-  })
-
-  test("desabilita botão durante submissão", async () => {
-    let resolveMutate: Function
-    mutateAsyncMock.mockImplementation(
-      () => new Promise(res => { resolveMutate = res })
     )
 
+    expect(await screen.findByText(/cliente cadastrado com sucesso/i)).toBeInTheDocument()
+  })
+
+  test("mostra erro se falhar no backend", async () => {
+    mutateAsyncMock.mockRejectedValueOnce(new Error("erro"))
+
     render(<FormClientRegister />)
-    fireEvent.change(screen.getByPlaceholderText(/Digite o nome completo/i), { target: { value: "Fulano" } })
-    fireEvent.change(screen.getByPlaceholderText(/\(DDD\) 999999999/i), { target: { value: "(11) 999999999" } })
-    fireEvent.change(screen.getByPlaceholderText(/exemplo@email.com/i), { target: { value: "fulano@email.com" } })
 
-    const button = screen.getByRole("button", { name: /Cadastrar Cliente/i })
-    fireEvent.click(button)
+    fireEvent.change(screen.getByLabelText(/nome completo/i), {
+      target: { value: "Pedro" },
+    })
+    fireEvent.change(screen.getByLabelText(/email/i), {
+      target: { value: "pedro@email.com" },
+    })
+    fireEvent.change(screen.getByLabelText(/telefone/i), {
+      target: { value: "(11)900001111" },
+    })
 
-    expect(button).toBeDisabled()
+    fireEvent.click(screen.getByRole("button", { name: /cadastrar cliente/i }))
 
-    resolveMutate!()
-    await waitFor(() => expect(button).not.toBeDisabled())
+    expect(await screen.findByText(/falha ao cadastrar cliente/i)).toBeInTheDocument()
   })
 })

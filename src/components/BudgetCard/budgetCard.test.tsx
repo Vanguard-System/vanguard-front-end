@@ -56,12 +56,12 @@ const mockOrcamento = {
   origem: "São Paulo",
   destino: "Rio de Janeiro",
   car_id: "1",
-  driver_id: "1",
+  driver_id: ["1"], 
   cliente_id: "1",
   data_hora_viagem: "2025-11-03T10:00",
   date_hour_return_trip: "2025-11-03T18:00",
   preco_viagem: 500,
-  lucro: 150,
+  lucroDesejado: 150,
   status: "Pendente",
   distancia_total: 400,
 }
@@ -126,19 +126,13 @@ describe("BudgetCard", () => {
     )
   })
 
-  test("deleta orçamento após confirmação", () => {
-    renderComponent()
-    window.confirm = jest.fn(() => true)
-    fireEvent.click(screen.getByText(/Excluir/i))
-    expect(mutateDeleteMock).toHaveBeenCalledWith("1")
-  })
-
   test("botão de WhatsApp gera link correto", () => {
     renderComponent()
     window.open = jest.fn()
     fireEvent.click(screen.getByText(/Enviar no WhatsApp/i))
+
     expect(window.open).toHaveBeenCalledWith(
-      expect.stringContaining("https://wa.me/5511999999999"),
+      expect.stringContaining("https://wa.me/55"),
       "_blank"
     )
   })

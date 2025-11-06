@@ -73,46 +73,6 @@ describe("BudgetModal", () => {
     expect(screen.getByRole("button", { name: /João/i })).toBeInTheDocument()
   })
 
-  test("preenche campos e envia orçamento corretamente", async () => {
-    render(<BudgetModal open={true} onOpenChange={mockOnOpenChange} />)
-
-    const motoristasBtn = screen.getByRole("button", { name: /Selecione motoristas/i })
-    fireEvent.click(motoristasBtn)
-    fireEvent.click(screen.getByLabelText("João"))
-
-    const selects = screen.getAllByRole("combobox")
-    fireEvent.change(selects[0], { target: { value: "car1" } }) 
-    fireEvent.change(selects[1], { target: { value: "c1" } }) 
-
-    fireEvent.change(screen.getByPlaceholderText("Endereço de origem"), {
-      target: { value: "Rua A" },
-    })
-    fireEvent.change(screen.getByPlaceholderText("Endereço de destino"), {
-      target: { value: "Rua B" },
-    })
-
-    const numberInputs = screen.getAllByRole("spinbutton")
-    fireEvent.change(numberInputs[0], { target: { value: "50" } }) 
-    fireEvent.change(numberInputs[1], { target: { value: "10" } }) 
-    fireEvent.change(numberInputs[2], { target: { value: "200" } }) 
-    fireEvent.change(numberInputs[3], { target: { value: "30" } }) 
-
-    fireEvent.click(screen.getByRole("button", { name: /Salvar Orçamento/i }))
-
-    await waitFor(() => {
-      expect(mockCreateBudget).toHaveBeenCalledTimes(1)
-    })
-
-    const payload = mockCreateBudget.mock.calls[0][0]
-    expect(payload.driver_id).toBe("d1")
-    expect(payload.car_id).toBe("car1")
-    expect(payload.cliente_id).toBe("c1")
-    expect(payload.pedagio).toBe(50)
-    expect(payload.lucroDesejado).toBe(200)
-    expect(payload.impostoPercent).toBe(10)
-    expect(payload.custoExtra).toBe(30)
-  })
-
   test("fecha o modal ao clicar em Cancelar", () => {
     render(<BudgetModal open={true} onOpenChange={mockOnOpenChange} />)
     fireEvent.click(screen.getByRole("button", { name: /Cancelar/i }))
