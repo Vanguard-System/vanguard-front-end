@@ -40,8 +40,8 @@ describe("BudgetList", () => {
 
   test("renderiza lista de orçamentos", () => {
     const mockOrcamentos: Orcamento[] = [
-      { id: "1", origem: "São Paulo", destino: "Rio", car_id: "1", driver_id: "1", cliente_id: "1", data_hora_viagem: "", date_hour_return_trip: "", preco_viagem: 100, lucro: 50, status: "Pendente", distancia_total: 400 },
-      { id: "2", origem: "Campinas", destino: "Belo Horizonte", car_id: "2", driver_id: "2", cliente_id: "2", data_hora_viagem: "", date_hour_return_trip: "", preco_viagem: 200, lucro: 80, status: "Aprovada", distancia_total: 600 },
+      { id: "1", origem: "São Paulo", destino: "Rio", car_id: "1", driver_id: ["1"], cliente_id: "1", data_hora_viagem: "", date_hour_return_trip: "", preco_viagem: 100, lucroDesejado: 50, status: "Pendente", distancia_total: 400 },
+      { id: "2", origem: "Campinas", destino: "Belo Horizonte", car_id: "2", driver_id: ["2"], cliente_id: "2", data_hora_viagem: "", date_hour_return_trip: "", preco_viagem: 200, lucroDesejado: 80, status: "Aprovada", distancia_total: 600 },
     ]
       ; (useBudget as jest.Mock).mockReturnValue({ data: mockOrcamentos, isLoading: false })
       ; (useUpdateBudget as jest.Mock).mockReturnValue({ mutateAsync: mutateAsyncMock })
@@ -59,7 +59,7 @@ describe("BudgetList", () => {
 
   test("chama updateBudget e deleteBudget ao interagir com BudgetCard", async () => {
     const mockOrcamentos: Orcamento[] = [
-      { id: "1", origem: "São Paulo", destino: "Rio", car_id: "1", driver_id: "1", cliente_id: "1", data_hora_viagem: "", date_hour_return_trip: "", preco_viagem: 100, lucro: 50, status: "Pendente", distancia_total: 400 },
+      { id: "1", origem: "São Paulo", destino: "Rio", car_id: "1", driver_id: ["1"], cliente_id: "1", data_hora_viagem: "", date_hour_return_trip: "", preco_viagem: 100, lucroDesejado: 50, status: "Pendente", distancia_total: 400 },
     ]
       ; (useBudget as jest.Mock).mockReturnValue({ data: mockOrcamentos, isLoading: false })
       ; (useUpdateBudget as jest.Mock).mockReturnValue({ mutateAsync: mutateAsyncMock })

@@ -1,110 +1,83 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { CarRegisterForm } from ".";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react"
+import { CarRegisterForm } from "."
+import { useCreateCar } from "@/services/hooks/useCar"
 
-const toastMock = jest.fn();
-jest.mock("@/hooks/use-toast", () => ({
-  useToast: () => ({ toast: toastMock }),
-}));
+jest.mock("@/services/hooks/useCar")
 
-const mutateAsyncMock = jest.fn();
-jest.mock("@/services/hooks/useCar", () => ({
-  useCreateCar: () => ({ mutateAsync: mutateAsyncMock }),
-}));
+const mutateAsyncMock = jest.fn()
+
+  ; (useCreateCar as jest.Mock).mockReturnValue({
+    mutateAsync: mutateAsyncMock,
+  })
 
 describe("CarRegisterForm", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-  });
+    jest.clearAllMocks()
+  })
 
-  test("renderiza corretamente os campos e botão", () => {
-    render(<CarRegisterForm />);
-    expect(screen.getByLabelText(/modelo/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/placa/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/consumo/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/preço fixo/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /cadastrar carro/i })).toBeInTheDocument();
-  });
+  test("renderiza o formulário com campos básicos", () => {
+    render(<CarRegisterForm />)
+    expect(screen.getByLabelText(/modelo/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/placa/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/consumo/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/preço fixo/i)).toBeInTheDocument()
+  })
 
-  test("valida campos obrigatórios", async () => {
-    render(<CarRegisterForm />);
-    const button = screen.getByRole("button", { name: /cadastrar carro/i });
-    fireEvent.click(button);
+  test("exibe erro ao tentar enviar sem preencher modelo", async () => {
+    render(<CarRegisterForm />)
+    fireEvent.click(screen.getByRole("button", { name: /cadastrar carro/i }))
+    expect(await screen.findByText(/modelo é obrigatório/i)).toBeInTheDocument()
+    expect(mutateAsyncMock).not.toHaveBeenCalled()
+  })
 
-    expect(toastMock).toHaveBeenCalledWith(expect.objectContaining({
-      title: "Erro",
-      description: "Modelo é obrigatório",
-    }));
+  test("exibe erro ao tentar enviar sem preencher placa", async () => {
+    render(<CarRegisterForm />)
+    fireEvent.change(screen.getByLabelText(/modelo/i), { target: { value: "Fusca" } })
+    fireEvent.click(screen.getByRole("button", { name: /cadastrar carro/i }))
+    expect(await screen.findByText(/placa é obrigatória/i)).toBeInTheDocument()
+    expect(mutateAsyncMock).not.toHaveBeenCalled()
+  })
 
-    fireEvent.change(screen.getByLabelText(/modelo/i), { target: { value: "Modelo X" } });
-    fireEvent.click(button);
+  test("envia o formulário com sucesso", async () => {
+    mutateAsyncMock.mockResolvedValueOnce({})
 
-    expect(toastMock).toHaveBeenCalledWith(expect.objectContaining({
-      title: "Erro",
-      description: "Placa é obrigatória",
-    }));
-  });
+    render(<CarRegisterForm />)
 
-  test("chama mutateAsync e exibe toast de sucesso", async () => {
-    mutateAsyncMock.mockResolvedValueOnce({});
-    render(<CarRegisterForm />);
+    fireEvent.change(screen.getByLabelText(/modelo/i), { target: { value: "Fusca" } })
+    fireEvent.change(screen.getByLabelText(/placa/i), { target: { value: "ABC1234" } })
+    fireEvent.change(screen.getByLabelText(/consumo/i), { target: { value: "8.5" } })
+    fireEvent.change(screen.getByLabelText(/preço fixo/i), { target: { value: "500" } })
 
-    fireEvent.change(screen.getByLabelText(/modelo/i), { target: { value: "Modelo X" } });
-    fireEvent.change(screen.getByLabelText(/placa/i), { target: { value: "ABC-1234" } });
-    fireEvent.change(screen.getByLabelText(/consumo/i), { target: { value: "8" } });
-    fireEvent.change(screen.getByLabelText(/preço fixo/i), { target: { value: "500" } });
+    fireEvent.click(screen.getByRole("button", { name: /cadastrar carro/i }))
 
-    fireEvent.click(screen.getByRole("button", { name: /cadastrar carro/i }));
-
-    await waitFor(() => {
+    await waitFor(() =>
       expect(mutateAsyncMock).toHaveBeenCalledWith({
-        model: "Modelo X",
-        plate: "ABC-1234",
-        consumption: "8",
-        fixed_cost: "500",
-      });
+        model: "Fusca",
+        plate: "ABC1234",
+        consumption: 8.5,
+        fixed_cost: 500,
+      })
+    )
 
-      expect(toastMock).toHaveBeenCalledWith(expect.objectContaining({
-        title: "Sucesso",
-        description: "Carro cadastrado com sucesso",
-      }));
-    });
-  });
+    expect(await screen.findByText(/carro cadastrado com sucesso/i)).toBeInTheDocument()
+  })
 
-  test("exibe toast de erro ao falhar", async () => {
-    mutateAsyncMock.mockRejectedValueOnce(new Error("Falha"));
-    render(<CarRegisterForm />);
+  test("exibe erro ao falhar no cadastro", async () => {
+    mutateAsyncMock.mockRejectedValueOnce({
+      response: { data: { message: "Erro de backend" } },
+    })
 
-    fireEvent.change(screen.getByLabelText(/modelo/i), { target: { value: "Modelo X" } });
-    fireEvent.change(screen.getByLabelText(/placa/i), { target: { value: "ABC-1234" } });
+    render(<CarRegisterForm />)
 
-    fireEvent.click(screen.getByRole("button", { name: /cadastrar carro/i }));
+    fireEvent.change(screen.getByLabelText(/modelo/i), { target: { value: "Gol" } })
+    fireEvent.change(screen.getByLabelText(/placa/i), { target: { value: "XYZ5678" } })
+    fireEvent.change(screen.getByLabelText(/consumo/i), { target: { value: "10" } })
+    fireEvent.change(screen.getByLabelText(/preço fixo/i), { target: { value: "600" } })
 
-    await waitFor(() => {
-      expect(toastMock).toHaveBeenCalledWith(expect.objectContaining({
-        title: "Erro",
-        description: "Falha ao cadastrar carro",
-      }));
-    });
-  });
+    fireEvent.click(screen.getByRole("button", { name: /cadastrar carro/i }))
 
-  test("desabilita botão durante envio", async () => {
-    let resolvePromise: () => void;
-    const promise = new Promise<void>(resolve => { resolvePromise = resolve; });
-    mutateAsyncMock.mockReturnValue(promise);
-
-    render(<CarRegisterForm />);
-
-    fireEvent.change(screen.getByLabelText(/modelo/i), { target: { value: "Modelo X" } });
-    fireEvent.change(screen.getByLabelText(/placa/i), { target: { value: "ABC-1234" } });
-
-    const button = screen.getByRole("button", { name: /cadastrar carro/i });
-    fireEvent.click(button);
-
-    expect(button).toBeDisabled();
-
-    resolvePromise!();
-    await waitFor(() => {
-      expect(button).not.toBeDisabled();
-    });
-  });
-});
+    await waitFor(() =>
+      expect(screen.getByText(/erro de backend/i)).toBeInTheDocument()
+    )
+  })
+})

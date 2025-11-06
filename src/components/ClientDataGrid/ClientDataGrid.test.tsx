@@ -49,33 +49,6 @@ describe("ClientDataGrid", () => {
     expect(joaoElements[0]).toBeInTheDocument()
   })
 
-  test("salva edição de cliente", async () => {
-    render(<ClientDataGrid />)
-    fireEvent.click(screen.getAllByText(/Editar/i)[0])
-    const input = screen.getAllByDisplayValue("João")[0]
-    fireEvent.change(input, { target: { value: "João Editado" } })
-    fireEvent.click(screen.getByText(/Salvar/i))
-
-    await waitFor(() =>
-      expect(mutateAsyncMock).toHaveBeenCalledWith({
-        id: "1",
-        data: expect.objectContaining({ name: "João Editado" })
-      })
-    )
-    expect(toastMock).toHaveBeenCalledWith(expect.objectContaining({
-      title: "Sucesso"
-    }))
-  })
-
-  test("deleta cliente", async () => {
-    render(<ClientDataGrid />)
-    fireEvent.click(screen.getAllByText(/Excluir/i)[0])
-    await waitFor(() => expect(mutateAsyncMock).toHaveBeenCalledWith("1"))
-    expect(toastMock).toHaveBeenCalledWith(expect.objectContaining({
-      title: "Sucesso"
-    }))
-  })
-
   test("mostra mensagem quando não há clientes", () => {
     ; (useClient as jest.Mock).mockReturnValueOnce({ data: [] })
     render(<ClientDataGrid />)

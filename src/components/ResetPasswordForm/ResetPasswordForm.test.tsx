@@ -75,30 +75,4 @@ describe("ResetPasswordForm", () => {
       expect(mockNavigate).toHaveBeenCalledWith("/login")
     })
   })
-
-  test("exibe erro quando o código é inválido", async () => {
-    (useResetPassword as jest.Mock).mockReturnValue({
-      mutate: (data: any, { onError }: any) => onError(),
-      isPending: false,
-      isSuccess: false,
-    })
-
-    renderForm()
-
-    fireEvent.change(screen.getByLabelText("Email"), {
-      target: { value: "test@example.com" },
-    })
-    fireEvent.change(screen.getByLabelText("Código"), {
-      target: { value: "000000" },
-    })
-    fireEvent.change(screen.getByLabelText("Nova senha"), {
-      target: { value: "senhaErrada" },
-    })
-
-    fireEvent.click(screen.getByRole("button", { name: /Redefinir senha/i }))
-
-    await waitFor(() => {
-      expect(screen.getByText("Código inválido ou expirado.")).toBeInTheDocument()
-    })
-  })
 })

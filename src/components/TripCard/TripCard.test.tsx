@@ -14,7 +14,7 @@ describe("TripCard", () => {
     origem: "São Paulo",
     destino: "Rio de Janeiro",
     car_id: "Fiat Uno",
-    driver_id: "João Silva",
+    driver_id: ["João Silva"],
     data_hora_viagem: "2025-10-10T08:30:00Z",
     date_hour_return_trip: "2025-10-12T18:00:00Z",
     cliente_id: "Cliente XPTO",

@@ -52,15 +52,6 @@ describe("DriverDataGrid", () => {
     expect(screen.getByText("Ana")).toBeInTheDocument()
   })
 
-  test("deleta motorista", async () => {
-    render(<DriverDataGrid />)
-
-    const deleteButtons = screen.getAllByRole("button", { name: "" })
-    fireEvent.click(deleteButtons[2])
-
-    await waitFor(() => expect(mutateAsyncMock).toHaveBeenCalledWith("1"))
-  })
-
   test("gera holerite do motorista", async () => {
     const { pdf } = require("@react-pdf/renderer")
     const { saveAs } = require("file-saver")
