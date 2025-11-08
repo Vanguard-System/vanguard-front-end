@@ -116,6 +116,35 @@ export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
     return () => clearTimeout(timer)
   }, [alert])
 
+  const renderSelectedDrivers = () => {
+    if (selectedDrivers.length === 0) return "Selecione motoristas"
+    return drivers
+      ?.filter((d: any) => selectedDrivers.includes(d.id))
+      .map((d: any) => d.name)
+      .join(", ")
+  }
+
+  const handleDriverChange = (driverId: string, checked: boolean) => {
+    setSelectedDrivers(prev =>
+      checked ? [...prev, driverId] : prev.filter(id => id !== driverId)
+    )
+  }
+
+  const renderDriverList = () => {
+    if (isDriversLoading) return <p>Carregando...</p>
+    return drivers?.map((d: any) => (
+      <label key={d.id} className="flex items-center space-x-2 py-1">
+        <input
+          type="checkbox"
+          checked={selectedDrivers.includes(d.id)}
+          onChange={e => handleDriverChange(d.id, e.target.checked)}
+        />
+        <span>{d.name}</span>
+      </label>
+    ))
+  }
+
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -128,36 +157,22 @@ export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="grid gap-2 relative" ref={driversRef}>
               <Label>Motoristas</Label>
+
               <Button
                 variant="outline"
                 onClick={() => setDriversOpen(!driversOpen)}
                 className="text-left truncate max-w-full"
               >
-                {selectedDrivers.length > 0
-                  ? drivers?.filter((d: any) => selectedDrivers.includes(d.id)).map((d: any) => d.name).join(", ")
-                  : "Selecione motoristas"}
+                {renderSelectedDrivers()}
               </Button>
+
               {driversOpen && (
                 <div className="absolute z-50 border rounded p-2 max-h-40 overflow-y-auto mt-1 w-full bg-white shadow-md">
-                  {isDriversLoading ? <p>Carregando...</p> :
-                    drivers?.map((d: any) => (
-                      <label key={d.id} className="flex items-center space-x-2 py-1">
-                        <input
-                          type="checkbox"
-                          checked={selectedDrivers.includes(d.id)}
-                          onChange={e => {
-                            const checked = e.target.checked
-                            setSelectedDrivers(prev =>
-                              checked ? [...prev, d.id] : prev.filter(id => id !== d.id)
-                            )
-                          }}
-                        />
-                        <span>{d.name}</span>
-                      </label>
-                    ))}
+                  {renderDriverList()}
                 </div>
               )}
             </div>
+
 
             <div className="grid gap-2">
               <Label>Carro</Label>

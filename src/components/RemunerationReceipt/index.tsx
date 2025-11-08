@@ -20,8 +20,6 @@ interface HoleriteSimplificadoProps {
 }
 
 export default function RemunerationReceipt({ dados }: HoleriteSimplificadoProps) {
-  const total = dados.viagens.quantidade * dados.viagens.valor
-
   return (
     <Document>
       <Page size="A4" style={styles.page}>

@@ -29,20 +29,16 @@ export function CarDataGrid() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [carToDelete, setCarToDelete] = useState<Car | null>(null)
 
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 5
+  const totalPages = Math.ceil(cars.length / itemsPerPage)
+  const paginatedCars = cars.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
   useEffect(() => {
     if (!alert) return
     const timer = setTimeout(() => setAlert(null), 4000)
     return () => clearTimeout(timer)
   }, [alert])
-
-  const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 5
-  const totalPages = Math.ceil(cars.length / itemsPerPage)
-  const paginatedCars = cars.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  )
 
   const startEdit = (car: Car) => {
     setEditingId(car.id)
@@ -90,12 +86,10 @@ export function CarDataGrid() {
           status: "error",
           message: "Não é possível deletar este carro porque ele está vinculado a um orçamento.",
         })
-      }
-      else {
+      } else {
         setAlert({ status: "error", message: "Falha ao deletar carro" })
       }
-    }
-    finally {
+    } finally {
       setDeleteConfirmOpen(false)
       setCarToDelete(null)
     }
@@ -108,147 +102,129 @@ export function CarDataGrid() {
 
   return (
     <div className="flex flex-col flex-1 p-4 md:p-6 ml-0 md:ml-64">
-      <h2 className="text-xl md:text-2xl font-semibold text-center mb-4 md:mb-6">Carros cadastrados</h2>
+      <h2 className="text-xl md:text-2xl font-semibold text-center mb-4 md:mb-6">
+        Carros cadastrados
+      </h2>
 
-      {/* Tabela Desktop */}
-      <div className="hidden md:flex flex-1 overflow-auto rounded-md border">
-        <Table className="w-full">
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[250px]">
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4" /> Modelo
-                </div>
-              </TableHead>
-              <TableHead>
-                <div className="flex items-center gap-2">
-                  <CreditCard className="h-4 w-4" /> Placa
-                </div>
-              </TableHead>
-              <TableHead>
-                <div className="flex items-center gap-2">
-                  <CreditCard className="h-4 w-4" /> Consumo
-                </div>
-              </TableHead>
-              <TableHead>
-                <div className="flex items-center gap-2">
-                  <CreditCard className="h-4 w-4" /> Custo Fixo
-                </div>
-              </TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {paginatedCars.map((car : any) => {
-              const isEditing = editingId === car.id
-              return (
-                <TableRow key={car.id} className="hover:bg-muted/50">
-                  <TableCell className="font-medium">
-                    {isEditing ? (
-                      <Input value={formData?.model || ""} onChange={e => handleChange("model", e.target.value)} className="h-8" />
-                    ) : (
-                      <span>{car.model}</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {isEditing ? (
-                      <Input value={formData?.plate || ""} onChange={e => handleChange("plate", e.target.value)} className="h-8" />
-                    ) : (
-                      <span>{car.plate}</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {isEditing ? (
-                      <Input value={formData?.consumption ?? 0} onChange={e => handleChange("consumption", e.target.value)} className="h-8" />
-                    ) : (
-                      <span>{car.consumption}</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {isEditing ? (
-                      <Input value={formData?.fixed_cost ?? 0} onChange={e => handleChange("fixed_cost", e.target.value)} className="h-8" />
-                    ) : (
-                      <span>{car.fixed_cost}</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-2">
+      {/* 💻 Tabela Desktop */}
+      <div className="hidden md:flex flex-col flex-1">
+        <div className="flex-1 overflow-auto rounded-md border">
+          <Table className="w-full">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[250px]">
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4" /> Modelo
+                  </div>
+                </TableHead>
+                <TableHead>
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="h-4 w-4" /> Placa
+                  </div>
+                </TableHead>
+                <TableHead>
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="h-4 w-4" /> Consumo
+                  </div>
+                </TableHead>
+                <TableHead>
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="h-4 w-4" /> Custo Fixo
+                  </div>
+                </TableHead>
+                <TableHead className="text-right">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paginatedCars.map((car: any) => {
+                const isEditing = editingId === car.id
+                return (
+                  <TableRow key={car.id} className="hover:bg-muted/50">
+                    <TableCell className="font-medium">
                       {isEditing ? (
-                        <>
-                          <Button variant="ghost" size="sm" onClick={saveEdit} className="h-8 px-3 hover:bg-green-50 hover:text-green-600">
-                            <Check className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" onClick={cancelEdit} className="h-8 px-3 hover:bg-gray-50 hover:text-gray-600">
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </>
-                      ) : (
-                        <>
-                          <Button variant="ghost" size="sm" onClick={() => startEdit(car)} className="h-8 px-3 hover:bg-blue-50 hover:text-blue-600">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(car)} className="h-8 px-3 hover:bg-red-50 hover:text-red-600">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )
-            })}
-          </TableBody>
-        </Table>
+                        <Input value={formData?.model || ""} onChange={e => handleChange("model", e.target.value)} className="h-8" />
+                      ) : <span>{car.model}</span>}
+                    </TableCell>
+                    <TableCell>
+                      {isEditing ? (
+                        <Input value={formData?.plate || ""} onChange={e => handleChange("plate", e.target.value)} className="h-8" />
+                      ) : <span>{car.plate}</span>}
+                    </TableCell>
+                    <TableCell>
+                      {isEditing ? (
+                        <Input type="number" value={formData?.consumption ?? 0} onChange={e => handleChange("consumption", e.target.value)} className="h-8" />
+                      ) : <span>{car.consumption}</span>}
+                    </TableCell>
+                    <TableCell>
+                      {isEditing ? (
+                        <Input type="number" value={formData?.fixed_cost ?? 0} onChange={e => handleChange("fixed_cost", e.target.value)} className="h-8" />
+                      ) : <span>{car.fixed_cost}</span>}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        {isEditing ? (
+                          <>
+                            <Button variant="ghost" size="sm" onClick={saveEdit} className="h-8 px-3 hover:bg-green-50 hover:text-green-600">
+                              <Check className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={cancelEdit} className="h-8 px-3 hover:bg-gray-50 hover:text-gray-600">
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            <Button variant="ghost" size="sm" onClick={() => startEdit(car)} className="h-8 px-3 hover:bg-blue-50 hover:text-blue-600">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(car)} className="h-8 px-3 hover:bg-red-50 hover:text-red-600">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Paginação Desktop */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-4 py-4">
+            <Button variant="ghost" size="sm" onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span>Página {currentPage} de {totalPages}</span>
+            <Button variant="ghost" size="sm" onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </div>
 
-      {/* Cards Mobile */}
+      {/* 📱 Cards Mobile */}
       <div className="md:hidden flex flex-col gap-4">
         {paginatedCars.map((car: any) => {
           const isEditing = editingId === car.id
           return (
             <div key={car.id} className="bg-card border rounded-lg p-4 space-y-3">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                  <User className="h-4 w-4" /> Modelo
-                </div>
-                {isEditing ? (
-                  <Input value={formData?.model || ""} onChange={e => handleChange("model", e.target.value)} className="h-9" />
-                ) : (
-                  <p className="font-medium">{car.model}</p>
-                )}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><User className="h-4 w-4" /> Modelo</div>
+                {isEditing ? <Input value={formData?.model || ""} onChange={e => handleChange("model", e.target.value)} className="h-9" /> : <p>{car.model}</p>}
               </div>
-
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                  <CreditCard className="h-4 w-4" /> Placa
-                </div>
-                {isEditing ? (
-                  <Input value={formData?.plate || ""} onChange={e => handleChange("plate", e.target.value)} className="h-9" />
-                ) : (
-                  <p>{car.plate}</p>
-                )}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><CreditCard className="h-4 w-4" /> Placa</div>
+                {isEditing ? <Input value={formData?.plate || ""} onChange={e => handleChange("plate", e.target.value)} className="h-9" /> : <p>{car.plate}</p>}
               </div>
-
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                  <CreditCard className="h-4 w-4" /> Consumo
-                </div>
-                {isEditing ? (
-                  <Input value={formData?.consumption ?? 0} onChange={e => handleChange("consumption", e.target.value)} className="h-9" />
-                ) : (
-                  <p>{car.consumption}</p>
-                )}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><CreditCard className="h-4 w-4" /> Consumo</div>
+                {isEditing ? <Input type="number" value={formData?.consumption ?? 0} onChange={e => handleChange("consumption", e.target.value)} className="h-9" /> : <p>{car.consumption}</p>}
               </div>
-
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                  <CreditCard className="h-4 w-4" /> Custo Fixo
-                </div>
-                {isEditing ? (
-                  <Input value={formData?.fixed_cost ?? 0} onChange={e => handleChange("fixed_cost", e.target.value)} className="h-9" />
-                ) : (
-                  <p>{car.fixed_cost}</p>
-                )}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><CreditCard className="h-4 w-4" /> Custo Fixo</div>
+                {isEditing ? <Input type="number" value={formData?.fixed_cost ?? 0} onChange={e => handleChange("fixed_cost", e.target.value)} className="h-9" /> : <p>{car.fixed_cost}</p>}
               </div>
 
               <div className="flex items-center justify-end gap-2 pt-2 border-t">
@@ -290,7 +266,7 @@ export function CarDataGrid() {
         )}
       </div>
 
-
+      {/* 🧩 Diálogo de Confirmação */}
       <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
         <DialogPortal>
           <DialogOverlay className="fixed inset-0 bg-black/50 z-[999]" />
@@ -304,18 +280,10 @@ export function CarDataGrid() {
                 <strong>{carToDelete?.model}</strong>?
               </p>
               <DialogFooter className="flex justify-end gap-2 pt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => setDeleteConfirmOpen(false)}
-                  className="w-24"
-                >
+                <Button variant="outline" onClick={() => setDeleteConfirmOpen(false)} className="w-24">
                   Cancelar
                 </Button>
-                <Button
-                  variant="destructive"
-                  onClick={confirmDelete}
-                  className="w-24"
-                >
+                <Button variant="destructive" onClick={confirmDelete} className="w-24">
                   Excluir
                 </Button>
               </DialogFooter>
@@ -324,15 +292,18 @@ export function CarDataGrid() {
         </DialogPortal>
       </Dialog>
 
-      {/* Alerta Backend */}
+      {/* ⚠️ Alerta */}
       {alert && (
         <div className="fixed bottom-5 right-5 sm:right-8 w-72 sm:w-96 z-50">
           <BackendAlert status={alert.status} message={alert.message} />
         </div>
       )}
 
+      {/* 🚫 Nenhum carro */}
       {cars.length === 0 && (
-        <div className="text-center py-8 text-muted-foreground">Nenhum carro cadastrado</div>
+        <div className="text-center py-8 text-muted-foreground">
+          Nenhum carro cadastrado
+        </div>
       )}
     </div>
   )

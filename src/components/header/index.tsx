@@ -18,12 +18,11 @@ const menuItems = [
 ]
 
 export default function Header() {
-  const [notifications] = useState(3)
   const [searchQuery, setSearchQuery] = useState("")
   const [menuOpen, setMenuOpen] = useState(false)
   const navigate = useNavigate();
 
-  const { data: currentUser, isLoading } = useCurrentUser() // pega o usuário logado
+  const { data: currentUser, isLoading } = useCurrentUser() 
 
   const handleLogout = async () => {
     await logout();
@@ -40,35 +39,18 @@ export default function Header() {
     <header className="fixed top-0 left-0 w-full bg-white border-b border-gray-200 shadow-sm z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
           <div className="flex items-center">
             <div className="w-60 h-48 bg-gradient-to-r rounded-lg flex items-center justify-center">
               <img src="src/assets/title.jpeg" alt="Descrição da imagem" />
             </div>
           </div>
 
-          {/* Busca Desktop */}
-          {/* <div className="flex-1 mx-4 hidden sm:block">
-            <form onSubmit={handleSearch} className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                type="text"
-                placeholder="Pesquisar..."
-                value={searchQuery}
-                onChange={handleSearchChange}
-                className="pl-10 pr-4 py-2 w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </form>
-          </div> */}
-
-          {/* Hamburger Mobile */}
           <div className="sm:hidden flex items-center">
             <Button variant="ghost" onClick={() => setMenuOpen(!menuOpen)}>
               {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </Button>
           </div>
 
-          {/* Desktop Right */}
           <div className="hidden sm:flex items-center space-x-6">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
@@ -105,7 +87,6 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Menu Mobile */}
       {menuOpen && (
         <div className="sm:hidden bg-white border-t border-gray-200 shadow-md px-4 py-3">
           {/* Busca Mobile */}
@@ -122,7 +103,6 @@ export default function Header() {
             </div>
           </form>
 
-          {/* Menu Items Mobile */}
           <div className="flex flex-col space-y-2 mb-3">
             {menuItems.map((item) => (
               <Link key={item.title} to={item.url} onClick={() => setMenuOpen(false)}>
@@ -134,7 +114,6 @@ export default function Header() {
             ))}
           </div>
 
-          {/* Configurações e Logout */}
           <div className="flex flex-col space-y-2">
             <Link to="/Settings">
               <Button variant="ghost" className="w-full flex items-center justify-start gap-2">
