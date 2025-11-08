@@ -2,13 +2,23 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { User, Mail, CreditCard, Edit, Trash2, FileText, Check, X, ChevronLeft, ChevronRight, CircleDollarSign } from "lucide-react"
+import {
+  User,
+  Mail,
+  CreditCard,
+  Edit,
+  Trash2,
+  FileText,
+  Check,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  CircleDollarSign
+} from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useDriver, useUpdateDriver, useDeleteDriver } from "@/services/hooks/useDriver"
 import BackendAlert from "@/components/BackendAlert"
-
-// libs para gerar pdf
 import { pdf } from "@react-pdf/renderer"
 import { saveAs } from "file-saver"
 import RemunerationReceipt from "../RemunerationReceipt"
@@ -69,7 +79,7 @@ export function DriverDataGrid() {
     if (!formData) return
     setFormData(prev => prev ? { ...prev, [field]: value } : null)
   }
-  
+
   const handleDeleteClick = (driver: Driver) => {
     setDriverToDelete(driver)
     setDeleteConfirmOpen(true)
@@ -142,6 +152,7 @@ export function DriverDataGrid() {
         Motoristas Cadastrados
       </h2>
 
+      {/* Tabela Desktop */}
       <div className="hidden md:flex flex-1 overflow-auto rounded-md border">
         <Table className="w-full">
           <TableHeader>
@@ -181,110 +192,49 @@ export function DriverDataGrid() {
                 <TableRow key={driver.id} className="hover:bg-muted/50">
                   <TableCell className="font-medium">
                     {isEditing ? (
-                      <Input
-                        value={formData?.name || ""}
-                        onChange={(e) => handleChange("name", e.target.value)}
-                        className="h-8"
-                      />
-                    ) : (
-                      driver.name
-                    )}
+                      <Input value={formData?.name || ""} onChange={(e) => handleChange("name", e.target.value)} className="h-8" />
+                    ) : driver.name}
                   </TableCell>
                   <TableCell>
                     {isEditing ? (
-                      <Input
-                        value={formData?.cpf || ""}
-                        onChange={(e) => handleChange("cpf", e.target.value)}
-                        className="h-8"
-                      />
-                    ) : (
-                      driver.cpf
-                    )}
+                      <Input value={formData?.cpf || ""} onChange={(e) => handleChange("cpf", e.target.value)} className="h-8" />
+                    ) : driver.cpf}
                   </TableCell>
                   <TableCell>
                     {isEditing ? (
-                      <Input
-                        value={formData?.email || ""}
-                        onChange={(e) => handleChange("email", e.target.value)}
-                        className="h-8"
-                      />
-                    ) : (
-                      driver.email
-                    )}
+                      <Input value={formData?.email || ""} onChange={(e) => handleChange("email", e.target.value)} className="h-8" />
+                    ) : driver.email}
                   </TableCell>
                   <TableCell>
                     {isEditing ? (
-                      <Input
-                        type="number"
-                        value={formData?.driverCost ?? 0}
-                        onChange={(e) =>
-                          handleChange("driverCost", Number(e.target.value))
-                        }
-                        className="h-8"
-                      />
-                    ) : (
-                      driver.driverCost
-                    )}
+                      <Input type="number" value={formData?.driverCost ?? 0} onChange={(e) => handleChange("driverCost", Number(e.target.value))} className="h-8" />
+                    ) : driver.driverCost}
                   </TableCell>
                   <TableCell>
                     {isEditing ? (
-                      <Input
-                        type="number"
-                        value={formData?.dailyPriceDriver ?? 0}
-                        onChange={(e) =>
-                          handleChange("dailyPriceDriver", Number(e.target.value))
-                        }
-                        className="h-8"
-                      />
-                    ) : (
-                      driver.dailyPriceDriver
-                    )}
+                      <Input type="number" value={formData?.dailyPriceDriver ?? 0} onChange={(e) => handleChange("dailyPriceDriver", Number(e.target.value))} className="h-8" />
+                    ) : driver.dailyPriceDriver}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       {isEditing ? (
                         <>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={saveEdit}
-                            className="h-8 px-3 hover:bg-green-50 hover:text-green-600"
-                          >
+                          <Button variant="ghost" size="sm" onClick={saveEdit} className="h-8 px-3 hover:bg-green-50 hover:text-green-600">
                             <Check className="h-4 w-4" />
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={cancelEdit}
-                            className="h-8 px-3 hover:bg-gray-50 hover:text-gray-600"
-                          >
+                          <Button variant="ghost" size="sm" onClick={cancelEdit} className="h-8 px-3 hover:bg-gray-50 hover:text-gray-600">
                             <X className="h-4 w-4" />
                           </Button>
                         </>
                       ) : (
                         <>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleGeneratePayroll(driver)}
-                            className="h-8 px-3 hover:bg-green-50 hover:text-green-600"
-                          >
+                          <Button variant="ghost" size="sm" onClick={() => handleGeneratePayroll(driver)} className="h-8 px-3 hover:bg-green-50 hover:text-green-600">
                             <FileText className="h-4 w-4" />
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => startEdit(driver)}
-                            className="h-8 px-3 hover:bg-blue-50 hover:text-blue-600"
-                          >
+                          <Button variant="ghost" size="sm" onClick={() => startEdit(driver)} className="h-8 px-3 hover:bg-blue-50 hover:text-blue-600">
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteClick(driver)}
-                            className="h-8 px-3 hover:bg-red-50 hover:text-red-600"
-                          >
+                          <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(driver)} className="h-8 px-3 hover:bg-red-50 hover:text-red-600">
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </>
@@ -296,32 +246,78 @@ export function DriverDataGrid() {
             })}
           </TableBody>
         </Table>
-
-        {totalPages > 1 && (
-          <div className="flex justify-end items-center gap-2 mt-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => goToPage(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <span>
-              Página {currentPage} de {totalPages}
-            </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => goToPage(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        )}
       </div>
 
+      {/* Cards Mobile */}
+      <div className="md:hidden flex flex-col gap-4 overflow-auto">
+        {paginatedDrivers.map((driver: any) => {
+          const isEditing = editingId === driver.id
+          return (
+            <div key={driver.id} className="bg-card border rounded-lg p-4 space-y-3">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><User className="h-4 w-4" /> Nome</div>
+                {isEditing ? <Input value={formData?.name || ""} onChange={e => handleChange("name", e.target.value)} className="h-9" /> : <p>{driver.name}</p>}
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><CreditCard className="h-4 w-4" /> CPF</div>
+                {isEditing ? <Input value={formData?.cpf || ""} onChange={e => handleChange("cpf", e.target.value)} className="h-9" /> : <p>{driver.cpf}</p>}
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><Mail className="h-4 w-4" /> Email</div>
+                {isEditing ? <Input value={formData?.email || ""} onChange={e => handleChange("email", e.target.value)} className="h-9" /> : <p className="break-all">{driver.email}</p>}
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><CircleDollarSign className="h-4 w-4" /> Custo Motorista</div>
+                {isEditing ? <Input type="number" value={formData?.driverCost ?? 0} onChange={e => handleChange("driverCost", Number(e.target.value))} className="h-9" /> : <p>{driver.driverCost}</p>}
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><CircleDollarSign className="h-4 w-4" /> Diária Motorista</div>
+                {isEditing ? <Input type="number" value={formData?.dailyPriceDriver ?? 0} onChange={e => handleChange("dailyPriceDriver", Number(e.target.value))} className="h-9" /> : <p>{driver.dailyPriceDriver}</p>}
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t">
+                {isEditing ? (
+                  <>
+                    <Button variant="ghost" size="sm" onClick={saveEdit} className="h-9 px-4 hover:bg-green-50 hover:text-green-600">
+                      <Check className="h-4 w-4 mr-2" /> Salvar
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={cancelEdit} className="h-9 px-4 hover:bg-gray-50 hover:text-gray-600">
+                      <X className="h-4 w-4 mr-2" /> Cancelar
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button variant="ghost" size="sm" onClick={() => handleGeneratePayroll(driver)} className="h-9 px-4 hover:bg-green-50 hover:text-green-600">
+                      <FileText className="h-4 w-4 mr-2" /> Holerite
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => startEdit(driver)} className="h-9 px-4 hover:bg-blue-50 hover:text-blue-600">
+                      <Edit className="h-4 w-4 mr-2" /> Editar
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(driver)} className="h-9 px-4 hover:bg-red-50 hover:text-red-600">
+                      <Trash2 className="h-4 w-4 mr-2" /> Excluir
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Paginação Centralizada */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-4 py-4">
+          <Button variant="ghost" size="sm" onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span>{currentPage}/{totalPages}</span>
+          <Button variant="ghost" size="sm" onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
+      {/* Dialog de confirmação */}
       <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
         <DialogPortal>
           <DialogOverlay className="fixed inset-0 bg-black/50 z-[999]" />
@@ -335,18 +331,10 @@ export function DriverDataGrid() {
                 <strong>{driverToDelete?.name}</strong>?
               </p>
               <DialogFooter className="flex justify-end gap-2 pt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => setDeleteConfirmOpen(false)}
-                  className="w-24"
-                >
+                <Button variant="outline" onClick={() => setDeleteConfirmOpen(false)} className="w-24">
                   Cancelar
                 </Button>
-                <Button
-                  variant="destructive"
-                  onClick={confirmDelete}
-                  className="w-24"
-                >
+                <Button variant="destructive" onClick={confirmDelete} className="w-24">
                   Excluir
                 </Button>
               </DialogFooter>
@@ -355,6 +343,7 @@ export function DriverDataGrid() {
         </DialogPortal>
       </Dialog>
 
+      {/* Alertas fixos */}
       {alert && (
         <div className="fixed bottom-5 right-5 sm:right-8 w-72 sm:w-96 z-50">
           <BackendAlert status={alert.status} message={alert.message} />
@@ -362,5 +351,4 @@ export function DriverDataGrid() {
       )}
     </div>
   )
-
 }
