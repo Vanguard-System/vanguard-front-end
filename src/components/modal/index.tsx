@@ -15,6 +15,8 @@ import { useClient } from "@/services/hooks/useClient"
 import { useCar } from "@/services/hooks/useCar"
 import { useCreateBudget } from "@/services/hooks/useBudget"
 import BackendAlert from "../BackendAlert"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Info } from "lucide-react"
 
 type BudgetModalProps = {
   open: boolean
@@ -211,15 +213,26 @@ export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="grid gap-2">
+          <div className="grid gap-2">
+            <div className="flex items-center gap-1">
               <Label>Custo Extra</Label>
-              <Input type="number" value={custoExtra} onChange={e => setCustoExtra(Number(e.target.value))} step={0.01} />
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="w-4 h-4 text-gray-500 cursor-pointer" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Informe qualquer custo adicional da viagem (Ex: Algum abastecimento durante a viagem, alimentação...).</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
-            <div className="grid gap-2">
-              <Label>Nº Motoristas</Label>
-              <Input type="number" readOnly value={numMotoristas} className="bg-gray-100 cursor-not-allowed" />
-            </div>
+            <Input
+              type="number"
+              value={custoExtra}
+              onChange={e => setCustoExtra(Number(e.target.value))}
+              step={0.01}
+            />
           </div>
 
           <div className="flex gap-3 pt-4">
