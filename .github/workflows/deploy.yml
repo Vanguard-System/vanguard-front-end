@@ -15,11 +15,11 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Install dependencies and Build
         run: |
-          cd frontend
+          cd vanguard-front-end
           npm ci
           npm run build
 
@@ -32,4 +32,4 @@ jobs:
           port: 22
           script: |
             rm -rf /var/www/frontend/*
-            cp -r frontend/dist/* /var/www/frontend/
+            cp -r vanguard-front-end/dist/* /var/www/frontend/
