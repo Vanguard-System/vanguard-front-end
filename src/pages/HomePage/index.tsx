@@ -15,7 +15,8 @@ import {
 } from "recharts"
 
 export default function Page() {
-  const { data: trip = [], isLoading } = useBudgetTrips()
+  const { data, isLoading } = useBudgetTrips()
+  const trip: BudgetTrip[] = Array.isArray(data) ? data : []
 
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 5
@@ -27,13 +28,19 @@ export default function Page() {
 
   const destinosData = useMemo(() => {
     const grouped: Record<string, number> = {}
-    trip.forEach((t: any) => {
-      if (t.destino) grouped[t.destino] = (grouped[t.destino] || 0) + 1
-    })
+
+    if (Array.isArray(trip)) {
+      trip.forEach((t: any) => {
+        if (t?.destino) grouped[t.destino] = (grouped[t.destino] || 0) + 1
+      })
+    }
+
     return Object.entries(grouped)
       .map(([name, Quantidade]) => ({ name, Quantidade }))
       .sort((a, b) => b.Quantidade - a.Quantidade)
   }, [trip])
+
+  if (isLoading) return <p>Carregando...</p>
 
   return (
     <div className="ml-0 lg:ml-64 p-4 mt-10 sm:p-6 lg:p-8">
@@ -47,11 +54,12 @@ export default function Page() {
             <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 mb-1">
               Total de Orçamentos
             </CardTitle>
-            <div className="text-3xl font-bold text-gray-900 text-center">{trip.length}</div>
+            <div className="text-3xl font-bold text-gray-900 text-center">
+              {trip.length}
+            </div>
           </CardContent>
         </Card>
 
-        {/* Gráfico ocupa o restante */}
         <Card className="flex-1">
           <CardHeader className="pb-2">
             <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">
@@ -82,9 +90,15 @@ export default function Page() {
       </div>
 
       <div className="flex flex-col gap-6">
-        {paginatedTrips.map((trip: BudgetTrip) => (
-          <TripCard key={trip.id} trip={trip} />
-        ))}
+        {paginatedTrips.length > 0 ? (
+          paginatedTrips.map((trip: BudgetTrip) => (
+            <TripCard key={trip.id} trip={trip} />
+          ))
+        ) : (
+          <p className="text-center text-gray-500">
+            Nenhuma viagem encontrada.
+          </p>
+        )}
       </div>
 
       <div className="flex justify-center items-center mt-6 gap-2">

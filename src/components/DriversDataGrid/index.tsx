@@ -36,7 +36,8 @@ interface Driver {
 }
 
 export function DriverDataGrid() {
-  const { data: drivers = [] } = useDriver()
+  const { data } = useDriver()
+  const drivers = Array.isArray(data) ? data : []
   const updateDriverMutation = useUpdateDriver()
   const deleteDriverMutation = useDeleteDriver()
 

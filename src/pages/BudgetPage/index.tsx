@@ -10,11 +10,12 @@ import BudgetCard from "@/components/BudgetCard"
 export default function BudgetPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const { data: orcamentos = [], isLoading } = useBudget()
+  const { data, isLoading } = useBudget()
+  const orcamentos: Orcamento[] = Array.isArray(data) ? data : []
+
   const updateBudget = useUpdateBudget()
   const deleteBudget = useDeleteBudget()
 
-  // Paginação
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 5
   const totalPages = Math.ceil(orcamentos.length / itemsPerPage)
@@ -27,7 +28,6 @@ export default function BudgetPage() {
 
   return (
     <div className="ml-0 lg:ml-64 p-4 mt-10 sm:p-6 lg:p-8">
-      {/* Cabeçalho */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-6 mb-6 gap-4">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Lista de Orçamentos</h1>
         <Button
@@ -38,8 +38,6 @@ export default function BudgetPage() {
         </Button>
       </div>
 
-      {/* Estatísticas */}
-      {/* Estatísticas */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8 mb-8 w-full">
         <Card className="flex flex-col justify-center items-center h-32 shadow-md hover:shadow-lg transition-all duration-200 w-full">
           <CardHeader className="pb-1 text-center">
@@ -62,7 +60,7 @@ export default function BudgetPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl sm:text-3xl font-bold text-green-600">
-              {orcamentos.filter((v: any) => v.status === "Aprovada").length}
+              {(orcamentos ?? []).filter((v: any) => v.status === "Aprovada").length}
             </div>
           </CardContent>
         </Card>
@@ -75,31 +73,29 @@ export default function BudgetPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl sm:text-3xl font-bold text-yellow-600">
-              {orcamentos.filter((v: any) => v.status === "Pendente").length}
+              {(orcamentos ?? []).filter((v: any) => v.status === "Pendente").length}
             </div>
           </CardContent>
         </Card>
       </div>
 
-
-
-
-      {/* Modal de cadastro */}
       <BudgetModal open={isModalOpen} onOpenChange={setIsModalOpen} />
 
-      {/* Lista de orçamentos com paginação */}
       <div className="flex flex-col gap-6">
-        {paginatedOrcamentos.map((orcamento: Orcamento) => (
-          <BudgetCard
-            key={orcamento.id}
-            orcamento={orcamento}
-            updateBudget={updateBudget}
-            deleteBudget={deleteBudget}
-          />
-        ))}
+        {paginatedOrcamentos.length > 0 ? (
+          paginatedOrcamentos.map((orcamento: Orcamento) => (
+            <BudgetCard
+              key={orcamento.id}
+              orcamento={orcamento}
+              updateBudget={updateBudget}
+              deleteBudget={deleteBudget}
+            />
+          ))
+        ) : (
+          <p className="text-center text-gray-500">Nenhum orçamento encontrado.</p>
+        )}
       </div>
 
-      {/* Paginação */}
       <div className="flex justify-center items-center mt-6 gap-2">
         <Button
           variant="outline"

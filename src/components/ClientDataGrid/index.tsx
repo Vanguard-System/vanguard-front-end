@@ -18,7 +18,12 @@ interface Client {
 }
 
 export function ClientDataGrid() {
-  const { data: clients = [] } = useClient()
+  const { data } = useClient()
+  const clients = Array.isArray(data)
+    ? data
+    : Array.isArray(data?.clients)
+      ? data.clients
+      : []
   const updateClientMutation = useUpdateClient()
   const deleteClientMutation = useDeleteClient()
 
