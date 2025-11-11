@@ -19,7 +19,8 @@ interface Car {
 }
 
 export function CarDataGrid() {
-  const { data: cars = [] } = useCar()
+  const { data } = useCar()
+  const cars = Array.isArray(data) ? data : Array.isArray(data?.cars) ? data.cars : []
   const updateCarMutation = useUpdateCar()
   const deleteCarMutation = useDeleteCar()
 
