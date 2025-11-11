@@ -38,9 +38,9 @@ export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
   const [numMotoristas, setNumMotoristas] = useState<number>(1)
   const [alert, setAlert] = useState<{ status: "success" | "error"; message: string } | null>(null)
 
-  const { data: drivers, isLoading: isDriversLoading } = useDriver()
-  const { data: cars } = useCar()
-  const { data: clients } = useClient()
+  const { data: drivers = [], isLoading: isDriversLoading } = useDriver()
+  const { data: cars = [] } = useCar()
+  const { data: clients = [] } = useClient()
   const { mutate: createBudget, isPending } = useCreateBudget()
 
   const [driversOpen, setDriversOpen] = useState(false)
