@@ -38,10 +38,15 @@ export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
   const [numMotoristas, setNumMotoristas] = useState<number>(1)
   const [alert, setAlert] = useState<{ status: "success" | "error"; message: string } | null>(null)
 
-  const { data: drivers = [], isLoading: isDriversLoading } = useDriver()
-  const { data: cars = [] } = useCar()
-  const { data: clients = [] } = useClient()
+  const { data: driversData, isLoading: isDriversLoading } = useDriver()
+  const { data: carsData } = useCar()
+  const { data: clientsData } = useClient()
   const { mutate: createBudget, isPending } = useCreateBudget()
+
+  // Garantindo que sempre teremos array
+  const drivers = Array.isArray(driversData) ? driversData : []
+  const cars = Array.isArray(carsData) ? carsData : []
+  const clients = Array.isArray(clientsData) ? clientsData : []
 
   const [driversOpen, setDriversOpen] = useState(false)
   const driversRef = useRef<HTMLDivElement>(null)
@@ -119,8 +124,8 @@ export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
   const renderSelectedDrivers = () => {
     if (selectedDrivers.length === 0) return "Selecione motoristas"
     return drivers
-      ?.filter((d: any) => selectedDrivers.includes(d.id))
-      .map((d: any) => d.name)
+      .filter(d => selectedDrivers.includes(d.id))
+      .map(d => d.name)
       .join(", ")
   }
 
@@ -132,7 +137,8 @@ export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
 
   const renderDriverList = () => {
     if (isDriversLoading) return <p>Carregando...</p>
-    return drivers?.map((d: any) => (
+    if (!drivers.length) return <p>Nenhum motorista disponível</p>
+    return drivers.map(d => (
       <label key={d.id} className="flex items-center space-x-2 py-1">
         <input
           type="checkbox"
@@ -143,7 +149,6 @@ export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
       </label>
     ))
   }
-
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -157,7 +162,6 @@ export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="grid gap-2 relative" ref={driversRef}>
               <Label>Motoristas</Label>
-
               <Button
                 variant="outline"
                 onClick={() => setDriversOpen(!driversOpen)}
@@ -165,7 +169,6 @@ export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
               >
                 {renderSelectedDrivers()}
               </Button>
-
               {driversOpen && (
                 <div className="absolute z-50 border rounded p-2 max-h-40 overflow-y-auto mt-1 w-full bg-white shadow-md">
                   {renderDriverList()}
@@ -173,12 +176,11 @@ export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
               )}
             </div>
 
-
             <div className="grid gap-2">
               <Label>Carro</Label>
               <select className="border rounded-md p-2" value={selectedCar} onChange={e => setSelectedCar(e.target.value)}>
                 <option value="">Selecione o carro</option>
-                {cars?.map((c: any) => (<option key={c.id} value={c.id}>{c.model}</option>))}
+                {cars.length ? cars.map(c => <option key={c.id} value={c.id}>{c.model}</option>) : <option disabled>Carregando...</option>}
               </select>
             </div>
           </div>
@@ -187,7 +189,7 @@ export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
             <Label>Cliente</Label>
             <select className="border rounded-md p-2" value={selectedClient} onChange={e => setSelectedClient(e.target.value)}>
               <option value="">Selecione o cliente</option>
-              {clients?.map((c: any) => (<option key={c.id} value={c.id}>{c.name}</option>))}
+              {clients.length ? clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>) : <option disabled>Carregando...</option>}
             </select>
           </div>
 
@@ -237,7 +239,7 @@ export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
                     <Info className="w-4 h-4 text-gray-500 cursor-pointer" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Informe qualquer custo adicional da viagem (Ex: Algum abastecimento durante a viagem, alimentação...).</p>
+                    <p>Informe qualquer custo adicional da viagem (Ex: abastecimento, alimentação, etc.)</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
