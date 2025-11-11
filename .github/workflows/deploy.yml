@@ -23,7 +23,6 @@ jobs:
           npm ci
           npm run build
           ls -la dist   # só para debug, opcional
-
       - name: Deploy via SSH
         uses: appleboy/ssh-action@master
         with:
