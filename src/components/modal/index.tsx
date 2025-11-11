@@ -86,16 +86,18 @@ export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
       return
     }
 
+    const safeNumber = (n: number) => Number.isFinite(n) ? n : 0;
+
     createBudget(
       {
         origem,
         destino,
         data_hora_viagem: dataPartida,
         data_hora_viagem_retorno: dataRetorno || "",
-        pedagio,
-        lucroDesejado,
-        impostoPercent,
-        custoExtra,
+        pedagio: safeNumber(pedagio),
+        lucroDesejado: safeNumber(lucroDesejado),
+        impostoPercent: safeNumber(impostoPercent),
+        custoExtra: safeNumber(custoExtra),
         numMotoristas,
         driver_id: selectedDrivers,
         car_id: selectedCar,
