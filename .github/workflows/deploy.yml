@@ -19,13 +19,10 @@ jobs:
 
       - name: Install dependencies and Build
         run: |
-          echo "Current directory: $(pwd)"
-          ls -la
+          cd vanguard-front-end
           npm ci
           npm run build
-          echo "After build:"
-          ls -la
-          ls -la dist
+          ls -la dist   # garante que a pasta dist existe
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@master
@@ -35,6 +32,5 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            echo "Deploying frontend..."
             rm -rf /var/www/frontend/*
-            cp -r dist/* /var/www/frontend/
+            cp -r vanguard-front-end/dist/* /var/www/frontend/
