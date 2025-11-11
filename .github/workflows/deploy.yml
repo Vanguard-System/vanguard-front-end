@@ -17,14 +17,14 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build
-        run: npm run build
+      - name: Install dependencies and Build
+        run: |
+          cd frontend
+          npm ci
+          npm run build
 
       - name: Deploy via SSH
-        uses: appleboy/ssh-action@v0.1.8
+        uses: appleboy/ssh-action@0.1.8
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
@@ -32,4 +32,4 @@ jobs:
           port: 22
           script: |
             rm -rf /var/www/frontend/*
-            cp -r dist/* /var/www/frontend/
+            cp -r frontend/dist/* /var/www/frontend/
