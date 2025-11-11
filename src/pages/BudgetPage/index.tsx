@@ -30,6 +30,8 @@ export default function BudgetPage() {
 
   if (isLoading) return <p>Carregando...</p>
 
+  console.log('aaaaaa')
+
   return (
     <div className="ml-0 lg:ml-64 p-4 mt-10 sm:p-6 lg:p-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-6 mb-6 gap-4">
