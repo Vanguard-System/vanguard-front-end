@@ -1,8 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_URL,
-  withCredentials: true,
+  baseURL: "https://vanguardsystem.com.br", // URL do seu backend
+  withCredentials: true, // mantém cookies/session
 });
 
 export default api;
