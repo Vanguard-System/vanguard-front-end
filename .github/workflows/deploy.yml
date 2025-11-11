@@ -19,10 +19,9 @@ jobs:
 
       - name: Install dependencies and Build
         run: |
-          cd vanguard-front-end
           npm ci
           npm run build
-          ls -la # debug para confirmar que dist/ foi criado
+          ls -la # debug para conferir se dist/ existe
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@master
@@ -33,4 +32,4 @@ jobs:
           port: 22
           script: |
             rm -rf /var/www/frontend/*
-            cp -r vanguard-front-end/dist/* /var/www/frontend/
+            cp -r dist/* /var/www/frontend/
