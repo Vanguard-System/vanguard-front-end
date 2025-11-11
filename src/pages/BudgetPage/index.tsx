@@ -11,7 +11,11 @@ export default function BudgetPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const { data, isLoading } = useBudget()
-  const orcamentos: Orcamento[] = Array.isArray(data) ? data : []
+  const orcamentos: Orcamento[] = Array.isArray(data)
+    ? data
+    : Array.isArray(data?.orcamentos)
+      ? data.orcamentos
+      : []
 
   const updateBudget = useUpdateBudget()
   const deleteBudget = useDeleteBudget()
