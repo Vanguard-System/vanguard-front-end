@@ -19,9 +19,13 @@ jobs:
 
       - name: Install dependencies and Build
         run: |
+          echo "Current directory: $(pwd)"
+          ls -la
           npm ci
           npm run build
-          ls -la # debug para conferir se dist/ existe
+          echo "After build:"
+          ls -la
+          ls -la dist
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@master
@@ -31,5 +35,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
+            echo "Deploying frontend..."
             rm -rf /var/www/frontend/*
             cp -r dist/* /var/www/frontend/
