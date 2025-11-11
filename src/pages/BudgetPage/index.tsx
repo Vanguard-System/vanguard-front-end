@@ -30,7 +30,7 @@ export default function BudgetPage() {
 
   if (isLoading) return <p>Carregando...</p>
 
-  console.log('aaaaaa')
+  console.log('fui pra prod')
 
   return (
     <div className="ml-0 lg:ml-64 p-4 mt-10 sm:p-6 lg:p-8">
