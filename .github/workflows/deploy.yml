@@ -30,9 +30,10 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "dist/*"
+          source: "dist/"
           target: "/var/www/frontend/"
-
+          strip_components: 1
+          
       - name: Reload Nginx (optional)
         uses: appleboy/ssh-action@v1.0.0
         with:
