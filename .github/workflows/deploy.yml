@@ -13,7 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 22
@@ -22,15 +22,24 @@ jobs:
         run: |
           npm ci
           npm run build
-          ls -la dist   # só para debug, opcional
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@master
+          ls -la dist   # debug opcional
+
+      - name: Upload build to server
+        uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
-          source: "dist/*"          # arquivos a enviar
-          target: "/var/www/frontend/"  # destino no servidor
+          source: "dist/"
+          target: "/var/www/frontend/"
+          strip_components: 1
+          
+      - name: Reload Nginx (optional)
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            echo "Deploy concluído!"  # comando opcional pós-cópia
+            sudo systemctl reload nginx
+            echo "✅ Frontend atualizado com sucesso!"
