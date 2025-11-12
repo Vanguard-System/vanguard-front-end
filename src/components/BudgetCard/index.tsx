@@ -386,16 +386,7 @@ export default function BudgetCard({
           <div className="flex items-center space-x-10">
             <div className="flex items-center text-green-600 font-bold text-xl">
               <DollarSign className="w-5 h-5 mr-1" />
-              {isEditing ? (
-                <Input
-                  type="number"
-                  value={formData.preco_viagem}
-                  onChange={(e) => handleChange("preco_viagem", parseFloat(e.target.value))}
-                  className="w-32 ml-1"
-                />
-              ) : (
-                formData.preco_viagem.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
-              )}
+              {formData.preco_viagem.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
             </div>
             <div className="flex items-center text-blue-600 font-medium">
               <span className="mr-1">Lucro:</span>
