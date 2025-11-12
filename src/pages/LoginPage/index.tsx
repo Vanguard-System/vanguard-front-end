@@ -12,6 +12,7 @@ import { login } from "@/services/auth"
 import { CreateUser } from "@/services/users"
 import { useNavigate } from "react-router-dom"
 import BackendAlert from "@/components/BackendAlert" 
+import title from "@/assets/title.jpeg";
 
 interface AuthFormData {
   email: string
@@ -116,7 +117,7 @@ export default function AuthForm() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br p-4">
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="space-y-1 text-center">
-          <img src="src/assets/title.jpeg" alt="Descrição da imagem" />
+          <img src={title} alt="Descrição da imagem" />
           <CardTitle className="text-2xl font-bold">{isLogin ? "Bem-vindo" : "Criar Conta"}</CardTitle>
           <CardDescription>
             {isLogin
