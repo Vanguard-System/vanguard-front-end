@@ -70,21 +70,19 @@ export default function AuthForm() {
         const res = await login(formData.email, formData.password)
         console.log("Login realizado:", res)
         setAlert({ status: 'success', message: "Login realizado com sucesso!" })
-        navigate("/Budget")
-      } else {
-        const res = await CreateUser({
-          email: formData.email,
-          username: formData.username!,
-          password: formData.password,
-        })
+        navigate("/Home")
+      } 
+      else {
         setAlert({ status: 'success', message: "Cadastro realizado com sucesso!" })
         setIsLogin(true)
         navigate("/login")
       }
-    } catch (error: any) {
+    } 
+    catch (error: any) {
       const msg = error?.response?.data?.message || error?.message || "Ocorreu um erro"
       setAlert({ status: 'error', message: msg })
-    } finally {
+    } 
+    finally {
       setIsLoading(false)
     }
   }
