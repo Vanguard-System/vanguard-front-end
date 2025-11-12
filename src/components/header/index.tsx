@@ -8,6 +8,7 @@ import { Settings, User, LogOut, Search, Menu, X, Home, Bus, Users } from "lucid
 import { Link, useNavigate } from "react-router-dom"
 import { logout } from "@/services/auth"
 import { useCurrentUser } from "@/services/hooks/useUsers" // <--- hook novo
+import title from "@/assets/title.jpeg";
 
 const menuItems = [
   { title: "Home", icon: Home, url: "/Home" },
@@ -41,7 +42,7 @@ export default function Header() {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <div className="w-60 h-48 bg-gradient-to-r rounded-lg flex items-center justify-center">
-              <img src="src/assets/title.jpeg" alt="Descrição da imagem" />
+              <img src={title} alt="Descrição da imagem" />
             </div>
           </div>
 

@@ -82,11 +82,9 @@ export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
 
   const handleSubmit = () => {
     if (!selectedClient || selectedDrivers.length === 0 || !selectedCar || !origem || !destino || !dataPartida) {
-      setAlert({ status: "error", message: "Preencha todos os campos obrigatórios antes de continuar." })
-      return
+      setAlert({ status: "error", message: "Preencha todos os campos obrigatórios antes de continuar." });
+      return;
     }
-
-    const safeNumber = (n: number) => Number.isFinite(n) ? n : 0;
 
     createBudget(
       {
@@ -94,10 +92,10 @@ export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
         destino,
         data_hora_viagem: dataPartida,
         data_hora_viagem_retorno: dataRetorno || "",
-        pedagio: safeNumber(pedagio),
-        lucroDesejado: safeNumber(lucroDesejado),
-        impostoPercent: safeNumber(impostoPercent),
-        custoExtra: safeNumber(custoExtra),
+        pedagio,
+        lucroDesejado,
+        impostoPercent,
+        custoExtra,
         numMotoristas,
         driver_id: selectedDrivers,
         car_id: selectedCar,
@@ -105,16 +103,16 @@ export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
       },
       {
         onSuccess: () => {
-          onOpenChange(false)
-          resetForm()
-          setAlert({ status: "success", message: "Orçamento cadastrado com sucesso" })
+          onOpenChange(false);
+          resetForm();
+          setAlert({ status: "success", message: "Orçamento cadastrado com sucesso" });
         },
         onError: (err: any) => {
-          const backendMessage = err?.response?.data?.message || err?.message || "Falha ao cadastrar orçamento"
-          setAlert({ status: "error", message: backendMessage })
+          const backendMessage = err?.response?.data?.message || err?.message || "Falha ao cadastrar orçamento";
+          setAlert({ status: "error", message: backendMessage });
         },
       }
-    )
+    );
   }
 
   useEffect(() => {
