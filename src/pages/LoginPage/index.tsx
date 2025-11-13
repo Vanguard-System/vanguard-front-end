@@ -73,6 +73,11 @@ export default function AuthForm() {
         navigate("/Home")
       } 
       else {
+       await CreateUser({
+          email: formData.email,
+          username: formData.username!,
+          password: formData.password,
+        })
         setAlert({ status: 'success', message: "Cadastro realizado com sucesso!" })
         setIsLogin(true)
         navigate("/login")
