@@ -68,11 +68,14 @@ export default function BudgetCard({
     motoristas: orcamento.driver_id || [], 
     cliente: String(orcamento.cliente_id || ""),
     data_hora_viagem: formatForInput(orcamento.data_hora_viagem),
-    date_hour_return_trip: formatForInput(orcamento.date_hour_return_trip),
+    data_hora_viagem_retorno: formatForInput(orcamento.data_hora_viagem_retorno),
     preco_viagem: orcamento.preco_viagem,
     lucroDesejado: orcamento.lucroDesejado,
     status: orcamento.status,
     distancia_total: orcamento.distancia_total,
+    pedagio: orcamento.pedagio,
+    impostoPercent: orcamento.impostoPercent,
+    custoExtra: orcamento.custoExtra
   })
 
   useEffect(() => {
@@ -92,21 +95,32 @@ export default function BudgetCard({
         return
       }
 
-      const payload = {
+      // Criar o payload base
+      const payload: any = {
         origem: formData.origem,
         destino: formData.destino,
         car_id: formData.carro,
-        driver_ids: formData.motoristas,
+        driver_id: formData.motoristas, // <-- corrigido (antes era driver_ids)
         cliente_id: formData.cliente,
         data_hora_viagem: formData.data_hora_viagem,
-        date_hour_return_trip: formData.date_hour_return_trip,
+        data_hora_viagem_retorno: formData.data_hora_viagem_retorno,
         lucroDesejado: formData.lucroDesejado,
-        preco_viagem: formData.preco_viagem,
         status: formData.status,
+        pedagio: formData.pedagio,
+        impostoPercent: formData.impostoPercent,
+        custoExtra: formData.custoExtra,
+        numMotoristas: formData.motoristas.length,
+
+      }
+
+      // 👉 Só manda preco_viagem SE o usuário editou
+      if (formData.preco_viagem !== orcamento.preco_viagem) {
+        payload.preco_viagem = formData.preco_viagem
       }
 
       await updateBudget.mutateAsync({ id: formData.id, data: payload })
       await queryClient.invalidateQueries({ queryKey: ["budget"] })
+
       setIsEditing(false)
       setIsEditingStatus(false)
       setAlert({ status: "success", message: "Orçamento atualizado com sucesso!" })
@@ -126,11 +140,14 @@ export default function BudgetCard({
         motoristas: orcamento.driver_id || [],
         cliente: String(orcamento.cliente_id || ""),
         data_hora_viagem: formatForInput(orcamento.data_hora_viagem),
-        date_hour_return_trip: formatForInput(orcamento.date_hour_return_trip),
+        data_hora_viagem_retorno: formatForInput(orcamento.data_hora_viagem_retorno),
         preco_viagem: Number(orcamento.preco_viagem) || 0,
         lucroDesejado: Number(orcamento.lucroDesejado) || 0,
         status: orcamento.status,
         distancia_total: orcamento.distancia_total || 0,
+        pedagio: orcamento.pedagio,
+        impostoPercent: orcamento.impostoPercent,
+        custoExtra: orcamento.custoExtra
       })
     }
   }, [orcamento, isEditing])
@@ -242,6 +259,7 @@ export default function BudgetCard({
                 <p className="text-gray-900 text-sm sm:text-base mt-1 ml-6">{formData.origem}</p>
               )}
             </div>
+
             <div>
               <div className="flex items-center text-gray-600">
                 <MapPin className="w-4 h-4 mr-2 text-red-500" />
@@ -357,7 +375,12 @@ export default function BudgetCard({
                 <span className="text-sm font-medium">Data/Horário Ida:</span>
               </div>
               {isEditing ? (
-                <Input type="datetime-local" value={formData.data_hora_viagem} onChange={(e) => handleChange("data_hora_viagem", e.target.value)} className="ml-6" />
+                <Input
+                  type="datetime-local"
+                  value={formData.data_hora_viagem}
+                  onChange={(e) => handleChange("data_hora_viagem", e.target.value)}
+                  className="ml-6"
+                />
               ) : (
                 <p className="text-gray-900 text-sm sm:text-base mt-1 ml-6">
                   {new Date(formData.data_hora_viagem).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
@@ -371,23 +394,75 @@ export default function BudgetCard({
                 <span className="text-sm font-medium">Data/Horário Retorno:</span>
               </div>
               {isEditing ? (
-                <Input type="datetime-local" value={formData.date_hour_return_trip} onChange={(e) => handleChange("date_hour_return_trip", e.target.value)} className="ml-6" />
+                <Input
+                  type="datetime-local"
+                  value={formData.data_hora_viagem_retorno}
+                  onChange={(e) => handleChange("data_hora_viagem_retorno", e.target.value)}
+                  className="ml-6"
+                />
               ) : (
                 <p className="text-gray-900 text-sm sm:text-base mt-1 ml-6">
-                  {new Date(formData.date_hour_return_trip).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
+                  {new Date(formData.data_hora_viagem_retorno).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
                 </p>
               )}
             </div>
           </div>
         </div>
 
-        {/* Rodapé */}
+        {isEditing && (
+          <div className="flex gap-6 mt-6 ml-6">
+            <div className="flex flex-col">
+              <label className="text-sm text-gray-600">Pedágio:</label>
+              <Input
+                type="number"
+                value={formData.pedagio}
+                onChange={(e) => handleChange("pedagio", parseFloat(e.target.value))}
+                className="w-32"
+              />
+            </div>
+
+            <div className="flex flex-col">
+              <label className="text-sm text-gray-600">Imposto (%):</label>
+              <Input
+                type="number"
+                value={formData.impostoPercent}
+                onChange={(e) => handleChange("impostoPercent", parseFloat(e.target.value))}
+                className="w-32"
+              />
+            </div>
+
+            <div className="flex flex-col">
+              <label className="text-sm text-gray-600">Custo Extra:</label>
+              <Input
+                type="number"
+                value={formData.custoExtra}
+                onChange={(e) => handleChange("custoExtra", parseFloat(e.target.value))}
+                className="w-32"
+              />
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-col sm:flex-row justify-between space-y-2 sm:space-y-0 sm:space-x-2 mt-4 pt-4 border-t border-gray-200">
           <div className="flex items-center space-x-10">
+
             <div className="flex items-center text-green-600 font-bold text-xl">
               <DollarSign className="w-5 h-5 mr-1" />
-              {formData.preco_viagem.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+              {isEditing ? (
+                <Input
+                  type="number"
+                  value={formData.preco_viagem}
+                  onChange={(e) => handleChange("preco_viagem", parseFloat(e.target.value))}
+                  className="w-36"
+                />
+              ) : (
+                formData.preco_viagem.toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                })
+              )}
             </div>
+
             <div className="flex items-center text-blue-600 font-medium">
               <span className="mr-1">Lucro:</span>
               {isEditing ? (
@@ -398,7 +473,10 @@ export default function BudgetCard({
                   className="w-32"
                 />
               ) : (
-                  formData.lucroDesejado.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
+                formData.lucroDesejado.toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                })
               )}
             </div>
           </div>
@@ -421,7 +499,6 @@ export default function BudgetCard({
               <MessageSquare className="w-4 h-4 text-green-500" /> Enviar no WhatsApp
             </Button>
 
-
             <Button
               variant="outline"
               size="sm"
@@ -437,19 +514,41 @@ export default function BudgetCard({
 
             {isEditing ? (
               <>
-                <Button variant="outline" size="sm" className="flex items-center gap-2 border text-black hover:bg-green-50 hover:text-green-600" onClick={handleSave}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2 border text-black hover:bg-green-50 hover:text-green-600"
+                  onClick={handleSave}
+                >
                   Salvar
                 </Button>
-                <Button variant="outline" size="sm" className="flex items-center gap-2 border text-gray-600 hover:bg-gray-100" onClick={() => setIsEditing(false)}>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2 border text-gray-600 hover:bg-gray-100"
+                  onClick={() => setIsEditing(false)}
+                >
                   Cancelar
                 </Button>
               </>
             ) : (
               <>
-                <Button variant="outline" size="sm" className="flex items-center gap-2 border text-blue-600 hover:bg-blue-50 hover:text-blue-600" onClick={() => setIsEditing(true)}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2 border text-blue-600 hover:bg-blue-50 hover:text-blue-600"
+                  onClick={() => setIsEditing(true)}
+                >
                   Editar
                 </Button>
-                <Button variant="outline" size="sm" className="flex items-center gap-2 border text-red-600 hover:bg-red-50" onClick={() => handleDeleteClick(orcamento)}>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2 border text-red-600 hover:bg-red-50"
+                  onClick={() => handleDeleteClick(orcamento)}
+                >
                   Excluir
                 </Button>
               </>
@@ -458,7 +557,6 @@ export default function BudgetCard({
         </div>
       </CardContent>
 
-      {/* Dialogo de exclusão */}
       <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
         <DialogPortal>
           <DialogOverlay className="fixed inset-0 bg-black/50 z-[999]" />
