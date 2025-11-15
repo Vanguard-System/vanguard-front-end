@@ -16,7 +16,7 @@ interface ViagemProps {
     origem: string
     destino: string
     data_hora_viagem: string
-    date_hour_return_trip: string
+    data_hora_viagem_retorno: string
     preco_viagem: number
     distancia_total: number
   }
@@ -35,7 +35,7 @@ export default function BudgetReceipt({ dados }: ViagemProps) {
         <View style={styles.header}>
           <Text style={{ fontSize: 18, fontWeight: "bold" }}>COMPROVANTE DE VIAGEM</Text>
           <Text>Ida: {formatDateTime(dados.data_hora_viagem)}</Text>
-          <Text>Retorno: {formatDateTime(dados.date_hour_return_trip)}</Text>
+          <Text>Retorno: {formatDateTime(dados.data_hora_viagem_retorno)}</Text>
         </View>
 
         <View style={styles.divider} />
@@ -70,7 +70,7 @@ export default function BudgetReceipt({ dados }: ViagemProps) {
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.label}>Data/Horário Retorno:</Text>
-            <Text>{formatDateTime(dados.date_hour_return_trip)}</Text>
+            <Text>{formatDateTime(dados.data_hora_viagem_retorno)}</Text>
           </View>
         </View>
 
