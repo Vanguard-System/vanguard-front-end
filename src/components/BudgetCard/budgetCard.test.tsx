@@ -59,11 +59,14 @@ const mockOrcamento = {
   driver_id: ["1"], 
   cliente_id: "1",
   data_hora_viagem: "2025-11-03T10:00",
-  date_hour_return_trip: "2025-11-03T18:00",
+  data_hora_viagem_retorno: "2025-11-03T18:00",
   preco_viagem: 500,
   lucroDesejado: 150,
   status: "Pendente",
   distancia_total: 400,
+  custoExtra: 100,
+  pedagio: 50,
+  impostoPercent: 9
 }
 
 const renderComponent = () =>
