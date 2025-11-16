@@ -17,7 +17,7 @@ describe("BudgetReceipt", () => {
     origem: "São Paulo",
     destino: "Rio de Janeiro",
     data_hora_viagem: "2025-11-03T10:00",
-    date_hour_return_trip: "2025-11-03T18:00",
+    data_hora_viagem_retorno: "2025-11-03T18:00",
     preco_viagem: 500,
     distancia_total: 400,
   }

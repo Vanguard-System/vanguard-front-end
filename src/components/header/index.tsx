@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Settings, User, LogOut, Search, Menu, X, Home, Bus, Users } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { logout } from "@/services/auth"
-import { useCurrentUser } from "@/services/hooks/useUsers" // <--- hook novo
+import { useCurrentUser } from "@/services/hooks/useUsers"
 import title from "@/assets/title.jpeg";
 
 const menuItems = [

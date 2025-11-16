@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react"
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react"
 
 jest.mock("../RemunerationReceipt", () => () => null)
 
@@ -48,9 +48,13 @@ describe("DriverDataGrid", () => {
 
   test("renderiza motoristas na tabela", () => {
     render(<DriverDataGrid />)
-    expect(screen.getByText("Lucas")).toBeInTheDocument()
-    expect(screen.getByText("Ana")).toBeInTheDocument()
+
+    const table = screen.getByRole("table")
+
+    expect(within(table).getByText("Lucas")).toBeInTheDocument()
+    expect(within(table).getByText("Ana")).toBeInTheDocument()
   })
+
 
   test("gera holerite do motorista", async () => {
     const { pdf } = require("@react-pdf/renderer")

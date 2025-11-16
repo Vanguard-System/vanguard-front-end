@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  test-build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -18,11 +18,14 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install dependencies and build
-        run: |
-          npm ci
-          npm run build
-          ls -la dist   # debug opcional
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build project
+        run: npm run build
 
       - name: Upload build to server
         uses: appleboy/scp-action@v0.1.4
@@ -33,8 +36,8 @@ jobs:
           source: "dist/"
           target: "/var/www/frontend/"
           strip_components: 1
-          
-      - name: Reload Nginx (optional)
+
+      - name: Reload Nginx
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SSH_HOST }}
