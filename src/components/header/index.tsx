@@ -116,12 +116,13 @@ export default function Header() {
           </div>
 
           <div className="flex flex-col space-y-2">
-            <Link to="/Settings">
+            <Link to="/Settings" onClick={() => setMenuOpen(false)}>
               <Button variant="ghost" className="w-full flex items-center justify-start gap-2">
                 <Settings className="w-4 h-4" /> Configurações
               </Button>
             </Link>
-            <Link to="/Login">
+
+            <Link to="/Login" onClick={() => setMenuOpen(false)}>
               <Button
                 onClick={handleLogout}
                 variant="outline"
