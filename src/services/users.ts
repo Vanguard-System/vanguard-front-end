@@ -10,10 +10,16 @@ export async function getUserById(id: string) {
   return data;
 }
 
-export async function CreateUser(userData: { email: string; username: string; password: string }) {
-  const { data } = await api.post("/users", userData)
-  return data
+export async function CreateUser(userData: {
+  email: string;
+  username: string;
+  password: string;
+  recaptchaToken: string;
+}) {
+  const { data } = await api.post("/users", userData);
+  return data;
 }
+
 
 export async function getCurrentUser() {
   const token = localStorage.getItem("token"); 

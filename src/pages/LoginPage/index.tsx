@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -11,14 +11,16 @@ import { Eye, EyeOff, Mail, Lock, User } from "lucide-react"
 import { login } from "@/services/auth"
 import { CreateUser } from "@/services/users"
 import { useNavigate } from "react-router-dom"
-import BackendAlert from "@/components/BackendAlert" 
-import title from "@/assets/title.jpeg";
+import BackendAlert from "@/components/BackendAlert"
+import HCaptcha from "@hcaptcha/react-hcaptcha"
+import title from "@/assets/title.jpeg"
 
 interface AuthFormData {
   email: string
   username?: string
   password: string
   rememberMe: boolean
+  recaptchaToken: string
 }
 
 export default function AuthForm() {
@@ -28,30 +30,32 @@ export default function AuthForm() {
     username: "",
     password: "",
     rememberMe: false,
+    recaptchaToken: ""
   })
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<Partial<AuthFormData>>({})
-  const [alert, setAlert] = useState<{ status: 'success' | 'error'; message: string } | null>(null)
+  const [alert, setAlert] = useState<{ status: "success" | "error"; message: string } | null>(null)
+  const [recaptchaToken, setRecaptchaToken] = useState<string>("")
+
   const navigate = useNavigate()
+  const hcaptchaRef = useRef<HCaptcha>(null)
 
   const validateForm = (): boolean => {
     const newErrors: Partial<AuthFormData> = {}
 
-    if (!formData.email) {
-      newErrors.email = "Email é obrigatório"
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Email inválido"
-    }
+    if (!formData.email) newErrors.email = "Email é obrigatório"
+    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Email inválido"
 
-    if (!isLogin && !formData.username) {
-      newErrors.username = "Username é obrigatório"
-    } else if (!isLogin && formData.username && formData.username.length < 3) {
+    if (!isLogin && !formData.username) newErrors.username = "Username é obrigatório"
+    else if (!isLogin && formData.username && formData.username.length < 3)
       newErrors.username = "Username deve ter pelo menos 3 caracteres"
-    }
 
-    if (!formData.password) {
-      newErrors.password = "Senha é obrigatória"
+    if (!formData.password) newErrors.password = "Senha é obrigatória"
+
+    if (!recaptchaToken) {
+      setAlert({ status: "error", message: "Por favor, confirme o hCaptcha" })
+      return false
     }
 
     setErrors(newErrors)
@@ -60,32 +64,34 @@ export default function AuthForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
     if (!validateForm()) return
-
     setIsLoading(true)
 
     try {
       if (isLogin) {
-        const res = await login(formData.email, formData.password)
-        console.log("Login realizado:", res)
-        setAlert({ status: 'success', message: "Login realizado com sucesso!" })
+        await login(formData.email, formData.password, recaptchaToken)
+        setAlert({ status: "success", message: "Login realizado com sucesso!" })
         navigate("/Home")
-      } 
-      else {
-       await CreateUser({
+      } else {
+        await CreateUser({
           email: formData.email,
           username: formData.username!,
           password: formData.password,
+          recaptchaToken: recaptchaToken
         })
-        setAlert({ status: 'success', message: "Cadastro realizado com sucesso!" })
+        setAlert({ status: "success", message: "Cadastro realizado com sucesso!" })
         setIsLogin(true)
         navigate("/login")
       }
+
+      hcaptchaRef.current?.resetCaptcha()
+      setRecaptchaToken("")
     } 
     catch (error: any) {
       const msg = error?.response?.data?.message || error?.message || "Ocorreu um erro"
-      setAlert({ status: 'error', message: msg })
+      setAlert({ status: "error", message: msg })
+      hcaptchaRef.current?.resetCaptcha()
+      setRecaptchaToken("")
     } 
     finally {
       setIsLoading(false)
@@ -94,9 +100,7 @@ export default function AuthForm() {
 
   const handleInputChange = (field: keyof AuthFormData, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }))
-    }
+    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }))
   }
 
   const toggleMode = () => {
@@ -107,21 +111,20 @@ export default function AuthForm() {
       username: "",
       password: "",
       rememberMe: false,
+      recaptchaToken: ""
     })
+    setRecaptchaToken("")
+    hcaptchaRef.current?.resetCaptcha()
   }
-
-  useEffect(() => {
-    if (!alert) return
-    const timer = setTimeout(() => setAlert(null), 4000)
-    return () => clearTimeout(timer)
-  }, [alert])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br p-4">
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="space-y-1 text-center">
           <img src={title} alt="Descrição da imagem" />
-          <CardTitle className="text-2xl font-bold">{isLogin ? "Bem-vindo" : "Criar Conta"}</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            {isLogin ? "Bem-vindo" : "Criar Conta"}
+          </CardTitle>
           <CardDescription>
             {isLogin
               ? "Entre com suas credenciais para acessar sua conta"
@@ -131,12 +134,12 @@ export default function AuthForm() {
 
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
+            {/* EMAIL */}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label>Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="email"
                   type="email"
                   placeholder="seu@email.com"
                   value={formData.email}
@@ -147,16 +150,16 @@ export default function AuthForm() {
               {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
             </div>
 
+            {/* USERNAME (cadastro) */}
             {!isLogin && (
               <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
+                <Label>Username</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    id="username"
                     type="text"
                     placeholder="Digite seu username"
-                    value={formData.username || ""}
+                    value={formData.username}
                     onChange={(e) => handleInputChange("username", e.target.value)}
                     className={`pl-10 ${errors.username ? "border-red-500" : ""}`}
                   />
@@ -165,12 +168,12 @@ export default function AuthForm() {
               </div>
             )}
 
+            {/* SENHA */}
             <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
+              <Label>Senha</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Digite sua senha"
                   value={formData.password}
@@ -184,34 +187,42 @@ export default function AuthForm() {
                   className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
+                  {showPassword ? <EyeOff /> : <Eye />}
                 </Button>
               </div>
               {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
             </div>
 
+            {/* REMEMBER-ME */}
             {isLogin && (
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <Checkbox
-                    id="remember"
                     checked={formData.rememberMe}
                     onCheckedChange={(checked) => handleInputChange("rememberMe", checked as boolean)}
                   />
-                  <Label htmlFor="remember" className="text-sm">
-                    Lembrar de mim
-                  </Label>
+                  <Label className="text-sm">Lembrar de mim</Label>
                 </div>
-                <Button
-                  type="button"
-                  variant="link"
-                  className="px-0 text-sm"
-                  onClick={() => navigate("/forgot-password")}
-                >
+                <Button variant="link" className="px-0" onClick={() => navigate("/forgot-password")}>
                   Esqueceu a senha?
                 </Button>
               </div>
             )}
+
+            <div className="flex justify-center">
+              <HCaptcha
+                sitekey="a4560eec-9da2-4b5a-a590-fcb08ee873b6"
+                onVerify={(token) => {
+                  console.log("✅ hCaptcha token recebido:", token)
+                  setRecaptchaToken(token)
+                }}
+                onExpire={() => {
+                  console.log("⚠️ hCaptcha expirou")
+                  setRecaptchaToken("")
+                }}
+                ref={hcaptchaRef}
+              />
+            </div>
           </CardContent>
 
           <CardFooter className="flex flex-col space-y-4">
@@ -219,7 +230,7 @@ export default function AuthForm() {
               {isLoading ? (isLogin ? "Entrando..." : "Cadastrando...") : isLogin ? "Entrar" : "Cadastrar"}
             </Button>
 
-            <div className="text-center text-sm text-muted-foreground">
+            <div className="text-center text-sm">
               {isLogin ? "Não tem uma conta?" : "Já tem uma conta?"}{" "}
               <Button variant="link" className="px-0" onClick={toggleMode}>
                 {isLogin ? "Cadastre-se" : "Faça login"}
@@ -230,7 +241,7 @@ export default function AuthForm() {
       </Card>
 
       {alert && (
-        <div className="fixed bottom-5 right-5 sm:right-8 w-72 sm:w-96 z-50">
+        <div className="fixed bottom-5 right-5 w-72 sm:w-96 z-50">
           <BackendAlert status={alert.status} message={alert.message} />
         </div>
       )}
