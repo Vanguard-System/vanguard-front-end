@@ -3,8 +3,8 @@ import { login, logout } from "../auth";
 
 export function useLogin() {
   return useMutation({
-    mutationFn: ({ email, password }: { email: string; password: string }) =>
-      login(email, password),
+    mutationFn: ({ email, password, recaptchaToken }: { email: string; password: string, recaptchaToken: string }) =>
+      login(email, password, recaptchaToken),
   });
 }
 
