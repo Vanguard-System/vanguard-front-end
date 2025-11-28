@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom"
 import BackendAlert from "@/components/BackendAlert"
 import HCaptcha from "@hcaptcha/react-hcaptcha"
 import title from "@/assets/title.jpeg"
+import TwoFactorModal from "@/components/TwoFactorModal"
 
 interface AuthFormData {
   email: string
@@ -37,6 +38,9 @@ export default function AuthForm() {
   const [errors, setErrors] = useState<Partial<AuthFormData>>({})
   const [alert, setAlert] = useState<{ status: "success" | "error"; message: string } | null>(null)
   const [recaptchaToken, setRecaptchaToken] = useState<string>("")
+
+  const [requires2FA, setRequires2FA] = useState(false)
+  const [twoFactorEmail, setTwoFactorEmail] = useState("")
 
   const navigate = useNavigate()
   const hcaptchaRef = useRef<HCaptcha>(null)
@@ -69,16 +73,28 @@ export default function AuthForm() {
 
     try {
       if (isLogin) {
-        await login(formData.email, formData.password, recaptchaToken)
+        const result = await login(formData.email, formData.password, recaptchaToken)
+
+        // 🚨 Se o backend pedir 2FA:
+        if (result.twoFactorRequired) {
+          setTwoFactorEmail(result.email)
+          setRequires2FA(true)
+          setAlert(null)
+          return
+        }
+
+        // Login normal
         setAlert({ status: "success", message: "Login realizado com sucesso!" })
         navigate("/Home")
-      } else {
+      }
+      else {
         await CreateUser({
           email: formData.email,
           username: formData.username!,
           password: formData.password,
           recaptchaToken: recaptchaToken
         })
+
         setAlert({ status: "success", message: "Cadastro realizado com sucesso!" })
         setIsLogin(true)
         navigate("/login")
@@ -86,13 +102,13 @@ export default function AuthForm() {
 
       hcaptchaRef.current?.resetCaptcha()
       setRecaptchaToken("")
-    } 
+    }
     catch (error: any) {
       const msg = error?.response?.data?.message || error?.message || "Ocorreu um erro"
       setAlert({ status: "error", message: msg })
       hcaptchaRef.current?.resetCaptcha()
       setRecaptchaToken("")
-    } 
+    }
     finally {
       setIsLoading(false)
     }
@@ -150,7 +166,7 @@ export default function AuthForm() {
               {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
             </div>
 
-            {/* USERNAME (cadastro) */}
+            {/* USERNAME NO CADASTRO */}
             {!isLogin && (
               <div className="space-y-2">
                 <Label>Username</Label>
@@ -193,7 +209,7 @@ export default function AuthForm() {
               {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
             </div>
 
-            {/* REMEMBER-ME */}
+            {/* Remember me */}
             {isLogin && (
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
@@ -203,23 +219,19 @@ export default function AuthForm() {
                   />
                   <Label className="text-sm">Lembrar de mim</Label>
                 </div>
+
                 <Button variant="link" className="px-0" onClick={() => navigate("/forgot-password")}>
                   Esqueceu a senha?
                 </Button>
               </div>
             )}
 
+            {/* hCaptcha */}
             <div className="flex justify-center">
               <HCaptcha
                 sitekey="a4560eec-9da2-4b5a-a590-fcb08ee873b6"
-                onVerify={(token) => {
-                  console.log("✅ hCaptcha token recebido:", token)
-                  setRecaptchaToken(token)
-                }}
-                onExpire={() => {
-                  console.log("⚠️ hCaptcha expirou")
-                  setRecaptchaToken("")
-                }}
+                onVerify={(token) => setRecaptchaToken(token)}
+                onExpire={() => setRecaptchaToken("")}
                 ref={hcaptchaRef}
               />
             </div>
@@ -239,6 +251,15 @@ export default function AuthForm() {
           </CardFooter>
         </form>
       </Card>
+
+      {/* 🔵 MODAL OU TELA DE 2FA */}
+      {requires2FA && (
+        <TwoFactorModal
+          email={twoFactorEmail}
+          onClose={() => setRequires2FA(false)}
+          onSuccess={() => navigate("/Home")}
+        />
+      )}
 
       {alert && (
         <div className="fixed bottom-5 right-5 w-72 sm:w-96 z-50">

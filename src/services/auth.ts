@@ -10,6 +10,16 @@ export async function login(email: string, password: string, recaptchaToken: str
   return data;
 }
 
+export async function verify2FA(email: string, code: string) {
+  const { data } = await api.post(
+    "/auth/2fa/verify",
+    { email, code },
+    { withCredentials: true } // necessário para gravar o cookie
+  );
+
+  return data;
+}
+
 
 export async function logout() {
   await api.post('/auth/logout'); 
