@@ -172,22 +172,6 @@ export default function BudgetCard({
     }
   }
 
-  const gerarLinkWhatsApp = (orcamento: Orcamento) => {
-    const mensagem = `Olá ${findName(clients || [], orcamento.cliente_id, "Cliente")}, aqui está seu orçamento:
-    Origem: ${orcamento.origem}
-    Destino: ${orcamento.destino}
-    Carro: ${orcamento.car_id}
-    Motorista(s): ${orcamento.driver_id.map((id: string) => findName(drivers || [], id, id)).join(", ")}
-    Data/Hora: ${new Date(orcamento.data_hora_viagem).toLocaleString("pt-BR")}
-    Preço: R$ ${orcamento.preco_viagem.toFixed(2)}`
-
-    const clienteObj = clients?.find((c: any) => String(c.id) === orcamento.cliente_id)
-    const numero = clienteObj?.telephone || "55DDNNNNNNNN"
-
-    return `https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`
-  }
-
-
   const findName = (list: any[], id: string, fallback: string) => {
     return list?.find((item) => String(item.id) === id)?.name || fallback
   }
@@ -486,30 +470,13 @@ export default function BudgetCard({
               variant="outline"
               size="sm"
               className="flex items-center gap-2 border text-black hover:bg-green-50 hover:text-green-600"
-              onClick={() => {
-                const orcamentoParaWhatsApp: Orcamento = {
-                  ...formData,
-                  car_id: formData.carro,
-                  driver_id: formData.motoristas,
-                  cliente_id: formData.cliente,
-                };
-                window.open(gerarLinkWhatsApp(orcamentoParaWhatsApp), "_blank");
-              }}
-            >
-              <MessageSquare className="w-4 h-4 text-green-500" /> Enviar no WhatsApp
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2 border text-black hover:bg-green-50 hover:text-green-600"
               onClick={async () => {
                 const blob = await pdf(<BudgetReceipt dados={formData} />).toBlob()
                 const viagemDate = new Date(formData.data_hora_viagem).toLocaleDateString("pt-BR")
                 saveAs(blob, `ticket-${formData.cliente}-${viagemDate}.pdf`)
               }}
             >
-              <FileText className="w-4 h-4" /> Holerite
+              <FileText className="w-4 h-4" /> Comprovante de viagem
             </Button>
 
             {isEditing ? (

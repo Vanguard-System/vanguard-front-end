@@ -260,7 +260,7 @@ export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
       </DialogContent>
 
       {alert && (
-        <div className="fixed bottom-5 right-5 sm:right-8 w-72 sm:w-96 z-50">
+        <div className="fixed bottom-5 right-5 sm:right-8 w-72 sm:w-96 z-[2000]">
           <BackendAlert status={alert.status} message={alert.message} />
         </div>
       )}
