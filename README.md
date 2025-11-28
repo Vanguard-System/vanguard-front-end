@@ -69,4 +69,4 @@ Desenvolver uma solução tecnológica que centralize a gestão de empresas de t
 ## Acesso em produção:
 - https://vanguardsystem.com.br/login
 
-
+# Todo o deploy foi feito na hostinger através de uma VPS.
