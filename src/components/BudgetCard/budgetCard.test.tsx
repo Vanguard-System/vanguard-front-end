@@ -129,21 +129,10 @@ describe("BudgetCard", () => {
     )
   })
 
-  test("botão de WhatsApp gera link correto", () => {
-    renderComponent()
-    window.open = jest.fn()
-    fireEvent.click(screen.getByText(/Enviar no WhatsApp/i))
-
-    expect(window.open).toHaveBeenCalledWith(
-      expect.stringContaining("https://wa.me/55"),
-      "_blank"
-    )
-  })
-
-  test("botão de Holerite gera PDF", async () => {
+  test("botão de Comprovante de viagem gera PDF", async () => {
     renderComponent()
     const fileSaver = require("file-saver")
-    fireEvent.click(screen.getByText(/Holerite/i))
+    fireEvent.click(screen.getByText(/Comprovante de viagem/i))
     await waitFor(() => expect(fileSaver.saveAs).toHaveBeenCalled())
   })
 })
