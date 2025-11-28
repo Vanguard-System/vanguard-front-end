@@ -212,14 +212,6 @@ export default function AuthForm() {
             {/* Remember me */}
             {isLogin && (
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    checked={formData.rememberMe}
-                    onCheckedChange={(checked) => handleInputChange("rememberMe", checked as boolean)}
-                  />
-                  <Label className="text-sm">Lembrar de mim</Label>
-                </div>
-
                 <Button variant="link" className="px-0" onClick={() => navigate("/forgot-password")}>
                   Esqueceu a senha?
                 </Button>

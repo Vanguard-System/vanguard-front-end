@@ -12,15 +12,16 @@ import Header from "../../components/header";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { useCurrentUser, useUpdateUser } from "@/services/hooks/useUsers";
+import { QueryClient, useQueryClient } from "@tanstack/react-query";
 
 export default function SettingsPage() {
   const { toast } = useToast();
   const { data: currentUser } = useCurrentUser();
   const updateUserMutation = useUpdateUser();
-
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [profileImage, setProfileImage] = useState("/diverse-user-avatars.png");
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (currentUser) {
@@ -42,6 +43,7 @@ export default function SettingsPage() {
         title: "Perfil atualizado",
         description: "Suas informações foram salvas com sucesso.",
       });
+      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
     } catch (error: any) {
       toast({
         title: "Erro ao atualizar",
