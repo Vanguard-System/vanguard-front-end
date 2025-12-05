@@ -27,6 +27,7 @@ import { useUpdateBudgetStatus } from "@/services/hooks/useBudget"
 import BackendAlert from "../BackendAlert"
 import { Dialog, DialogContent, DialogOverlay, DialogPortal, DialogTitle } from "@radix-ui/react-dialog"
 import { DialogFooter, DialogHeader } from "../ui/dialog"
+import { fixLocalDateTime } from "@/helper/dateHelper"
 
 interface BudgetCardProps {
   orcamento: Orcamento
@@ -100,10 +101,12 @@ export default function BudgetCard({
         origem: formData.origem,
         destino: formData.destino,
         car_id: formData.carro,
-        driver_id: formData.motoristas, // <-- corrigido (antes era driver_ids)
+        driver_id: formData.motoristas, 
         cliente_id: formData.cliente,
-        data_hora_viagem: formData.data_hora_viagem,
-        data_hora_viagem_retorno: formData.data_hora_viagem_retorno,
+        data_hora_viagem: fixLocalDateTime(formData.data_hora_viagem),
+        data_hora_viagem_retorno: formData.data_hora_viagem_retorno
+          ? fixLocalDateTime(formData.data_hora_viagem_retorno)
+          : "",
         lucroDesejado: formData.lucroDesejado,
         status: formData.status,
         pedagio: formData.pedagio,

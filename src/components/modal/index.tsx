@@ -17,6 +17,7 @@ import { useCreateBudget } from "@/services/hooks/useBudget"
 import BackendAlert from "../BackendAlert"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Info } from "lucide-react"
+import { fixLocalDateTime } from "@/helper/dateHelper"
 
 type BudgetModalProps = {
   open: boolean
@@ -90,8 +91,8 @@ export default function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
       {
         origem,
         destino,
-        data_hora_viagem: dataPartida,
-        data_hora_viagem_retorno: dataRetorno || "",
+        data_hora_viagem: fixLocalDateTime(dataPartida),
+        data_hora_viagem_retorno: dataRetorno ? fixLocalDateTime(dataRetorno) : "",
         pedagio,
         lucroDesejado,
         impostoPercent,

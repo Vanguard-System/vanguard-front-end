@@ -1,3 +1,4 @@
+import { fixLocalDateTime } from "@/helper/dateHelper"
 import api from "./api"
 
 // Pega todos os budgets
@@ -23,11 +24,19 @@ export async function createBudget(budgetData: {
   impostoPercent: number
   numMotoristas: number
   custoExtra: number
-  driver_id: string[] 
+  driver_id: string[]
   car_id: string
   cliente_id: string
 }) {
-  const { data } = await api.post("/budget", budgetData)
+  const payload = {
+    ...budgetData,
+    data_hora_viagem: fixLocalDateTime(budgetData.data_hora_viagem),
+    data_hora_viagem_retorno: budgetData.data_hora_viagem_retorno
+      ? fixLocalDateTime(budgetData.data_hora_viagem_retorno)
+      : "",
+  }
+
+  const { data } = await api.post("/budget", payload)
   return data
 }
 
@@ -43,12 +52,24 @@ export async function updateBudget(
     impostoPercent: number
     numMotoristas: number
     custoExtra: number
-    driver_id: string[] 
+    driver_id: string[]
     car_id: string
     cliente_id: string
   }>
 ) {
-  const { data } = await api.put(`/budget/${id}`, budgetData)
+  const payload = { ...budgetData }
+
+  if (budgetData.data_hora_viagem) {
+    payload.data_hora_viagem = fixLocalDateTime(budgetData.data_hora_viagem)
+  }
+
+  if (budgetData.data_hora_viagem_retorno) {
+    payload.data_hora_viagem_retorno = fixLocalDateTime(
+      budgetData.data_hora_viagem_retorno
+    )
+  }
+
+  const { data } = await api.put(`/budget/${id}`, payload)
   return data
 }
 
@@ -59,7 +80,6 @@ export async function updateBudgetStatus(
   const { data } = await api.patch(`/budget/${id}/status`, statusData)
   return data
 }
-
 
 // Deleta um budget
 export async function deleteBudget(id: string) {
