@@ -1,18 +1,24 @@
-// ConnectionStatus.test.tsx
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import ConnectionStatus from ".";
 
 describe("ConnectionStatus", () => {
   let originalNavigator: any;
+  let fetchMock: jest.SpyInstance;
 
-  beforeAll(() => {
-    // Salvar navigator original para restaurar depois
+  beforeEach(() => {
     originalNavigator = Object.getOwnPropertyDescriptor(window, "navigator");
+
+    global.fetch = jest.fn();
+
+    fetchMock = jest.spyOn(global as any, "fetch");
   });
 
-  afterAll(() => {
-    // Restaurar navigator original
-    Object.defineProperty(window, "navigator", originalNavigator);
+  afterEach(() => {
+    if (originalNavigator) {
+      Object.defineProperty(window, "navigator", originalNavigator);
+    }
+
+    jest.restoreAllMocks();
   });
 
   function setNavigatorOnLine(value: boolean) {
@@ -22,15 +28,31 @@ describe("ConnectionStatus", () => {
     });
   }
 
-  it("não renderiza nada quando online", () => {
+  it("não renderiza nada quando online", async () => {
     setNavigatorOnLine(true);
+
+    fetchMock.mockResolvedValue({ ok: true });
+
     render(<ConnectionStatus />);
-    expect(screen.queryByText(/Você está sem conexão/)).toBeNull();
+
+    await waitFor(() =>
+      expect(
+        screen.queryByText(/Você está sem conexão/)
+      ).toBeNull()
+    );
   });
 
-  it("renderiza o banner quando offline", () => {
+  it("renderiza o banner quando offline", async () => {
     setNavigatorOnLine(false);
+
+    fetchMock.mockRejectedValue(new Error("network error"));
+
     render(<ConnectionStatus />);
-    expect(screen.getByText(/Você está sem conexão/)).toBeInTheDocument();
+
+    await waitFor(() =>
+      expect(
+        screen.getByText(/Você está sem conexão/)
+      ).toBeInTheDocument()
+    );
   });
 });

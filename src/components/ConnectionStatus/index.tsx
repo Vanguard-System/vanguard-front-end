@@ -1,11 +1,31 @@
 import { useEffect, useState } from "react";
 
 export default function ConnectionStatus() {
-  const [online, setOnline] = useState(navigator.onLine);
+  const [online, setOnline] = useState(true);
+
+  async function checkConnection() {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 3000);
+
+      await fetch("https://www.google.com/generate_204", {
+        method: "GET",
+        mode: "no-cors",
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeout);
+      setOnline(true);
+    } catch (err) {
+      setOnline(false);
+    }
+  }
 
   useEffect(() => {
+    checkConnection();
+
     function handleOnline() {
-      setOnline(true);
+      checkConnection();
     }
 
     function handleOffline() {
@@ -15,9 +35,12 @@ export default function ConnectionStatus() {
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
 
+    const interval = setInterval(checkConnection, 5000);
+
     return () => {
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
+      clearInterval(interval);
     };
   }, []);
 

@@ -231,8 +231,8 @@ export default function BudgetCard({
         )}
       </div>
 
-      <CardContent className="p-4 sm:p-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+      <CardContent className="p-4 sm:p-6 overflow-x-hidden">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {/* Origem e Destino */}
           <div className="space-y-4">
             <div>
@@ -240,10 +240,15 @@ export default function BudgetCard({
                 <MapPin className="w-4 h-4 mr-2 text-blue-500" />
                 <span className="text-sm font-medium">Origem:</span>
               </div>
+
               {isEditing ? (
-                <Input value={formData.origem} onChange={(e) => handleChange("origem", e.target.value)} className="ml-6" />
+                <Input
+                  value={formData.origem}
+                  onChange={(e) => handleChange("origem", e.target.value)}
+                  className="ml-2 sm:ml-6"
+                />
               ) : (
-                <p className="text-gray-900 text-sm sm:text-base mt-1 ml-6">{formData.origem}</p>
+                <p className="text-gray-900 text-sm sm:text-base mt-1 ml-2 sm:ml-6">{formData.origem}</p>
               )}
             </div>
 
@@ -252,10 +257,17 @@ export default function BudgetCard({
                 <MapPin className="w-4 h-4 mr-2 text-red-500" />
                 <span className="text-sm font-medium">Destino:</span>
               </div>
+
               {isEditing ? (
-                <Input value={formData.destino} onChange={(e) => handleChange("destino", e.target.value)} className="ml-6" />
+                <Input
+                  value={formData.destino}
+                  onChange={(e) => handleChange("destino", e.target.value)}
+                  className="ml-2 sm:ml-6"
+                />
               ) : (
-                <p className="text-gray-900 text-sm sm:text-base mt-1 ml-6">{formData.destino}</p>
+                <p className="text-gray-900 text-sm sm:text-base mt-1 ml-2 sm:ml-6">
+                  {formData.destino}
+                </p>
               )}
             </div>
           </div>
@@ -267,9 +279,10 @@ export default function BudgetCard({
                 <Car className="w-4 h-4 mr-2 text-purple-500" />
                 <span className="text-sm font-medium">Carro:</span>
               </div>
+
               {isEditing ? (
                 <select
-                  className="ml-6 border rounded-md p-2 text-sm w-full"
+                  className="ml-2 sm:ml-6 border rounded-md p-2 text-sm w-full"
                   value={formData.carro}
                   onChange={(e) => handleChange("carro", e.target.value)}
                 >
@@ -281,7 +294,7 @@ export default function BudgetCard({
                   ))}
                 </select>
               ) : (
-                <p className="text-gray-900 text-sm sm:text-base mt-1 ml-6">
+                <p className="text-gray-900 text-sm sm:text-base mt-1 ml-2 sm:ml-6">
                   {findCar(cars || [], formData.carro, formData.carro)}
                 </p>
               )}
@@ -292,15 +305,16 @@ export default function BudgetCard({
                 <User className="w-4 h-4 mr-2 text-orange-500" />
                 <span className="text-sm font-medium">Motorista(s):</span>
               </div>
+
               {isEditing ? (
                 <select
                   multiple
-                  className="ml-6 border rounded-md p-2 text-sm w-full"
+                  className="ml-2 sm:ml-6 border rounded-md p-2 text-sm w-full"
                   value={formData.motoristas}
                   onChange={(e) =>
                     handleChange(
                       "motoristas",
-                      Array.from(e.target.selectedOptions, (option) => option.value)
+                      Array.from(e.target.selectedOptions, (o) => o.value)
                     )
                   }
                 >
@@ -311,7 +325,7 @@ export default function BudgetCard({
                   ))}
                 </select>
               ) : (
-                <p className="text-gray-900 text-sm sm:text-base mt-1 ml-6">
+                <p className="text-gray-900 text-sm sm:text-base mt-1 ml-2 sm:ml-6">
                   {formData.motoristas.map((id: string) => findName(drivers || [], id, id)).join(", ")}
                 </p>
               )}
@@ -325,9 +339,10 @@ export default function BudgetCard({
                 <Users className="w-4 h-4 mr-2 text-cyan-500" />
                 <span className="text-sm font-medium">Cliente:</span>
               </div>
+
               {isEditing ? (
                 <select
-                  className="ml-6 border rounded-md p-2 text-sm w-full"
+                  className="ml-2 sm:ml-6 border rounded-md p-2 text-sm w-full"
                   value={formData.cliente}
                   onChange={(e) => handleChange("cliente", e.target.value)}
                 >
@@ -339,7 +354,7 @@ export default function BudgetCard({
                   ))}
                 </select>
               ) : (
-                <p className="text-gray-900 text-sm sm:text-base mt-1 ml-6">
+                <p className="text-gray-900 text-sm sm:text-base mt-1 ml-2 sm:ml-6">
                   {findName(clients || [], formData.cliente, formData.cliente)}
                 </p>
               )}
@@ -350,7 +365,10 @@ export default function BudgetCard({
                 <Compass className="w-4 h-4 mr-2 text-blue-500" />
                 <span className="text-sm font-medium">Distância Total:</span>
               </div>
-              <p className="text-gray-900 text-sm sm:text-base mt-1 ml-6">{formData.distancia_total} km</p>
+
+              <p className="text-gray-900 text-sm sm:text-base mt-1 ml-2 sm:ml-6">
+                {formData.distancia_total} km
+              </p>
             </div>
           </div>
 
@@ -361,16 +379,20 @@ export default function BudgetCard({
                 <Calendar className="w-4 h-4 mr-2 text-green-500" />
                 <span className="text-sm font-medium">Data/Horário Ida:</span>
               </div>
+
               {isEditing ? (
                 <Input
                   type="datetime-local"
                   value={formData.data_hora_viagem}
                   onChange={(e) => handleChange("data_hora_viagem", e.target.value)}
-                  className="ml-6"
+                  className="ml-2 sm:ml-6"
                 />
               ) : (
-                <p className="text-gray-900 text-sm sm:text-base mt-1 ml-6">
-                  {new Date(formData.data_hora_viagem).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
+                <p className="text-gray-900 text-sm sm:text-base mt-1 ml-2 sm:ml-6">
+                  {new Date(formData.data_hora_viagem).toLocaleString("pt-BR", {
+                    dateStyle: "short",
+                    timeStyle: "short",
+                  })}
                 </p>
               )}
             </div>
@@ -380,24 +402,31 @@ export default function BudgetCard({
                 <Calendar className="w-4 h-4 mr-2 text-red-500" />
                 <span className="text-sm font-medium">Data/Horário Retorno:</span>
               </div>
+
               {isEditing ? (
                 <Input
                   type="datetime-local"
                   value={formData.data_hora_viagem_retorno}
-                  onChange={(e) => handleChange("data_hora_viagem_retorno", e.target.value)}
-                  className="ml-6"
+                  onChange={(e) =>
+                    handleChange("data_hora_viagem_retorno", e.target.value)
+                  }
+                  className="ml-2 sm:ml-6"
                 />
               ) : (
-                <p className="text-gray-900 text-sm sm:text-base mt-1 ml-6">
-                  {new Date(formData.data_hora_viagem_retorno).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
+                <p className="text-gray-900 text-sm sm:text-base mt-1 ml-2 sm:ml-6">
+                  {new Date(formData.data_hora_viagem_retorno).toLocaleString("pt-BR", {
+                    dateStyle: "short",
+                    timeStyle: "short",
+                  })}
                 </p>
               )}
             </div>
           </div>
         </div>
 
+        {/* Custos extras */}
         {isEditing && (
-          <div className="flex gap-6 mt-6 ml-6">
+          <div className="flex flex-wrap gap-6 mt-6 ml-2 sm:ml-6">
             <div className="flex flex-col">
               <label className="text-sm text-gray-600">Pedágio:</label>
               <Input
@@ -430,11 +459,13 @@ export default function BudgetCard({
           </div>
         )}
 
-        <div className="flex flex-col sm:flex-row justify-between space-y-2 sm:space-y-0 sm:space-x-2 mt-4 pt-4 border-t border-gray-200">
-          <div className="flex items-center space-x-10">
-
+        {/* Footer */}
+        <div className="flex flex-col sm:flex-row justify-between gap-4 mt-4 pt-4 border-t border-gray-200">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 ml-2 sm:ml-6">
+            {/* Preço */}
             <div className="flex items-center text-green-600 font-bold text-xl">
               <DollarSign className="w-5 h-5 mr-1" />
+
               {isEditing ? (
                 <Input
                   type="number"
@@ -450,8 +481,10 @@ export default function BudgetCard({
               )}
             </div>
 
+            {/* Lucro */}
             <div className="flex items-center text-blue-600 font-medium">
               <span className="mr-1">Lucro:</span>
+
               {isEditing ? (
                 <Input
                   type="number"
@@ -468,7 +501,8 @@ export default function BudgetCard({
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+          {/* Botões */}
+          <div className="flex flex-col sm:flex-row gap-2">
             <Button
               variant="outline"
               size="sm"
@@ -535,13 +569,16 @@ export default function BudgetCard({
               <DialogHeader>
                 <DialogTitle>Confirmar exclusão</DialogTitle>
               </DialogHeader>
+
               <p className="text-sm text-gray-600 mt-2">
                 Tem certeza que deseja excluir este orçamento?
               </p>
+
               <DialogFooter className="flex justify-end gap-2 pt-4">
                 <Button variant="outline" onClick={() => setDeleteConfirmOpen(false)} className="w-24">
                   Cancelar
                 </Button>
+
                 <Button variant="destructive" onClick={confirmDelete} className="w-24">
                   Excluir
                 </Button>
@@ -558,4 +595,5 @@ export default function BudgetCard({
       )}
     </Card>
   )
+
 }
